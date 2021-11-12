@@ -28,6 +28,7 @@ class BaumBot:
     def init_clients(self):
         self.responses = responses.Response()
         self.reddit_client = clients.RedditClient()
+        self.random_client = clients.RandomClient()
         self.porn_client = clients.PornClient()
         self.music_client = clients.MusicClient()
         self.stock_client = clients.StockClient()
@@ -121,7 +122,7 @@ class BaumBot:
         #Music client calls
         @self.slash.slash(name="play", description="Plays music from given link",
                           options=[create_option(name="url", description="The Url of the music website", option_type=3, required=True)])
-        async def play(context: SlashContext):
+        async def play(context: SlashContext, url: str):
             self.voice_channel = await utils.check_and_join(self.voice_channel, context)
             await context.defer()
             title = self.music_client.play(self.voice_channel, url)
@@ -142,15 +143,19 @@ class BaumBot:
         @self.slash.slash(name="stop", description="Stops the current playing song")
         async def stop(context: SlashContext):
             await context.defer()
-            self.music_client.resume(self.voice_channel)
+            self.music_client.stop(self.voice_channel)
             await context.send("(jazz music stops)")
 
-        #TODO Play
-        #TODO Stop
         #TODO Queue -> push -> yeet -> delete
         #TODO Spotify Ingetration
         #TODO Repeat
         #TODO radio <genre>
+
+        @self.slash.slash(name="randomnumber", description="Returns a random number", options=[
+                          create_option(name="min", description="lowest possible number", option_type=3, required=False),
+                          create_option(name="max", description="highest possible number", option_type=3, required=False)])
+        async def randomnumber(context: SlashContext, min: int =0, max: int = 1):
+            await context.send(self.random_client.get_random_number(min, max))
 
         #Porn client calls
         #TODO Random porn <website>

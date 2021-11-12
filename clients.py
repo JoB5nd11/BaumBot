@@ -1,4 +1,5 @@
 import praw
+import random
 import discord
 import youtube_dl
 
@@ -10,7 +11,7 @@ class RedditClient:
             user_agent="BaumBot",
             check_for_async=False #yeah fuck you
         )
-        self.max_responses = 105
+        self.max_responses = 20
 
     def get_random_subreddit(self, NSFW="yes", count=1, sort='/top/?t=all'):
         count = self._check_max_count(count)
@@ -151,15 +152,27 @@ class MusicClient:
     def pause(self, voice_channel):
         if voice_channel.is_playing:
             voice_channel.pause() #Check things
-            #What if i start /play again?
+        #not pausable mesage?
 
     def resume(self, voice_channel):
         if voice_channel.is_paused:
             voice_channel.resume()
+        #not resumable message
 
     def stop(self, voice_channel):
         if voice_channel.is_playing:
             voice_channel.stop() #What about the queue
+        #not stoppabel
+
+class RandomClient:
+    def __init__(self):
+        pass
+
+    def get_random_number(self, lower, higher):
+        if higher <= lower:
+            higher = lower + 1
+        answer = "{}".format(random.randint(lower, higher))
+        return answer
 
 class PornClient:
     def __init__(self):
