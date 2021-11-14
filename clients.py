@@ -2,6 +2,7 @@ import praw
 import random
 import discord
 import youtube_dl
+from PIL import Image
 
 class RedditClient:
     def __init__(self):
@@ -133,6 +134,9 @@ class MusicClient:
         }
         self.youtube = youtube_dl.YoutubeDL(ydl_opts)
 
+    #TODO wrong link -> Marek!
+    #TODO adult warning! -> nice cock!
+
     def play(self, voice_channel, url):
         #Differenciate between youtube and spotify
         if voice_channel.is_paused:
@@ -162,17 +166,31 @@ class MusicClient:
     def stop(self, voice_channel):
         if voice_channel.is_playing:
             voice_channel.stop() #What about the queue
-        #not stoppabel
+        #not stoppable
 
 class RandomClient:
     def __init__(self):
         pass
 
     def get_random_number(self, lower, higher):
+        higher = int(higher)
+        lower = int(lower)
         if higher <= lower:
             higher = lower + 1
-        answer = "{}".format(random.randint(lower, higher))
-        return answer
+        return str(random.randint(int(lower), int(higher)))
+
+class TicTacToeClient:
+    def __init__(self):
+        pass
+
+    def init_board(self):
+        pass
+
+    def make_x(self, position):
+        pass
+
+    def make_o(self, position):
+        pass
 
 class PornClient:
     def __init__(self):

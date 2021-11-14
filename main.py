@@ -150,7 +150,9 @@ class BaumBot:
         #TODO Spotify Ingetration
         #TODO Repeat
         #TODO radio <genre>
+        #TODO play soundfile
 
+        #Random client calls
         @self.slash.slash(name="randomnumber", description="Returns a random number", options=[
                           create_option(name="min", description="lowest possible number", option_type=3, required=False),
                           create_option(name="max", description="highest possible number", option_type=3, required=False)])
@@ -170,9 +172,15 @@ class BaumBot:
         #TODO get crypto graph <crypto name> <time [today, week, month, year, 5year, all]>
         #TODO get top flop of the day
         #TODO cash converter
-        #Finance system? <- pls no
+        #Finance system? <- pls no im a virign
 
         #Discord Bot Games (TicTacToe, Chess, etc) calls?
+        #TODO TicTacToe
+        @self.slash.slash(name="image", description="Return a image")
+        async def image(context: SlashContext):
+            with open('image.png', "rb") as f:
+                file = discord.File(f, filename='image.png')
+            await context.send(file=file)
 
         #Insults
 
