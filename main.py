@@ -32,6 +32,7 @@ class BaumBot:
         self.porn_client = clients.PornClient()
         self.music_client = clients.MusicClient()
         self.stock_client = clients.StockClient()
+        self.ttt_client = clients.TicTacToeClient()
 
     def init_events(self):
         @self.client.event
@@ -154,8 +155,8 @@ class BaumBot:
 
         #Random client calls
         @self.slash.slash(name="randomnumber", description="Returns a random number", options=[
-                          create_option(name="min", description="lowest possible number", option_type=3, required=False),
-                          create_option(name="max", description="highest possible number", option_type=3, required=False)])
+                          create_option(name="min", description="lowest possible number", option_type=4, required=False),
+                          create_option(name="max", description="highest possible number", option_type=4, required=False)])
         async def randomnumber(context: SlashContext, min: int =0, max: int = 1):
             await context.send(self.random_client.get_random_number(min, max))
 
@@ -176,12 +177,25 @@ class BaumBot:
 
         #Discord Bot Games (TicTacToe, Chess, etc) calls?
         #TODO TicTacToe
-        @self.slash.slash(name="image", description="Return a image")
-        async def image(context: SlashContext):
-            with open('image.png', "rb") as f:
-                file = discord.File(f, filename='image.png')
-            await context.send(file=file)
+        @self.slash.slash(name="ttt", description="Return a image", options=[
+                          create_option(name="getboard", description="gets the current board", option_type=5, required=False),
+                          create_option(name="makeboard", description="creates a board from given string", option_type=3, required=False),
+                          create_option(name="clearboard", description="clears the current board image", option_type=5, required=False),
+                          create_option(name="draw", description="draws the next character on given space", option_type=3, required=False)
+        ])
+        async def ttt(context: SlashContext, getboard: bool =False, makeboard: str ='', clearboard: bool =False, draw: str ='x0'):
+            if clearboard:
+                await context.send(file=self.ttt_client.clear_board())
+            elif getboard:
+                await context.send(file=self.ttt_client.get_board())
+            elif makeboard:
+                await context.send(file=self.ttt_client.get_board(makeboard))
+            elif draw != 0:
+                await context.send(file=self.ttt_client.move(draw))
+            else:
+                await context.send("I have a stroke :|")
 
+        #TODO 4 gewinnt
         #Insults
 
 

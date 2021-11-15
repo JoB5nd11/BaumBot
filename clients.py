@@ -1,8 +1,9 @@
+import os
 import praw
 import random
 import discord
 import youtube_dl
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFilter
 
 class RedditClient:
     def __init__(self):
@@ -181,16 +182,82 @@ class RandomClient:
 
 class TicTacToeClient:
     def __init__(self):
-        pass
+        _ = self.clear_board()
+        self.coordinates = [[0, 0], [100, 0], [200, 0], [0, 100], [100, 100], [200, 100], [0, 200], [100, 200], [200, 200]]
+        self.current_pos_string = '---------'
+        self.board_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\board.png')
+        self.current_board_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
+        self.x_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\cross.png')
+        self.o_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\circle.png')
 
-    def init_board(self):
-        pass
+    def get_board(self, pos_string='', error=False, occupied=False):
+        if len(pos_string) > 9 or error:
+            with open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\error.png', "rb") as f:
+                file = discord.File(f, filename=str(os.getcwd()) + '\\games\\tictactoe\\assets\\error.png')
+            return file
+        elif occupied:
+            with open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\occupied.png', "rb") as f:
+                file = discord.File(f, filename=str(os.getcwd()) + '\\games\\tictactoe\\assets\\occupied.png')
+            return file
 
-    def make_x(self, position):
-        pass
+        self.make_board(pos_string)
 
-    def make_o(self, position):
-        pass
+        file_name = str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png'
+        with open(file_name, "rb") as f:
+            file = discord.File(f, filename=file_name)
+        return file
+
+
+    def make_board(self, pos_string):
+        for i, pos in enumerate(pos_string):
+            if pos == 'x':
+                self.current_board_image.paste(self.x_image, (self.coordinates[i][0], self.coordinates[i][1]), self.x_image)
+                self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
+            elif pos == 'o':
+                self.current_board_image.paste(self.o_image, (self.coordinates[i][0], self.coordinates[i][1]), self.o_image)
+                self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
+
+    def clear_board(self):
+        self.current_board_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\board.png')
+        self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
+        self.current_pos_string = '---------'
+        return self.get_board()
+
+    def move(self, position):
+        position = [char for char in position]
+        if len(position) > 2:
+            print("TTT Move has more than 2 characters")
+            return self.get_board(error=True)
+
+        try:
+            field_nr = int(position[1]) - 1
+            if field_nr < 0 or field_nr > 8:
+                print("TTT field_nr is smaller than 0 or bigger than 8")
+                return self.get_board(error=True)
+        except:
+            print("TTT could not determine field_nr")
+            return self.get_board(error=True)
+
+        if self.current_pos_string[field_nr] != '-':
+            return self.get_board(occupied=True)
+
+        if position[0] == 'x':
+            self.put_symbol_in_current_pos_string('x', field_nr)
+        elif position[0] == 'o':
+            self.put_symbol_in_current_pos_string('o', field_nr)
+        else:
+            print("TTT symbol was neither x nor o")
+            return self.get_board(error=True)
+
+        return self.get_board(self.current_pos_string)
+
+    def game_over(self):
+        pass #TODO
+
+    def put_symbol_in_current_pos_string(self, symbol, position):
+        list1 = list(self.current_pos_string)
+        list1[position] = symbol
+        self.current_pos_string = ''.join(list1)
 
 class PornClient:
     def __init__(self):
