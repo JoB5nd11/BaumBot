@@ -33,6 +33,7 @@ class BaumBot:
         self.music_client = clients.MusicClient()
         self.stock_client = clients.StockClient()
         self.ttt_client = clients.TicTacToeClient()
+        self.book_client = clients.BookClient()
 
     def init_events(self):
         @self.client.event
@@ -68,6 +69,7 @@ class BaumBot:
             answer += "."
             await context.send(answer)
 
+
         #Channel commands
         @self.slash.slash(name="join", description="BaumBot joins the channel of the command author")
         async def join(context: SlashContext):
@@ -78,6 +80,7 @@ class BaumBot:
             await utils.check_and_leave(self.voice_channel)
             await context.send('I am leaving: "{}"'.format(context.author.voice.channel.name))
             self.voice_channel = None
+
 
         #Reddit client calls
         @self.slash.slash(name="randomsubreddit", description="Gives back a random subreddit link",
@@ -120,6 +123,7 @@ class BaumBot:
             await context.defer()
             await context.send(self.reddit_client.get_memes_of_the_day())
 
+
         #Music client calls
         @self.slash.slash(name="play", description="Plays music from given link",
                           options=[create_option(name="url", description="The Url of the music website", option_type=3, required=True)])
@@ -153,13 +157,58 @@ class BaumBot:
         #TODO radio <genre>
         #TODO play soundfile
 
+
+        #Book client calls
+        @self.slash.slash(name="getbooklist", description="Prints the Book-Database", options=[
+                          create_option(name="head", description="Number of Books from start", option_type=4, required=False),
+                          create_option(name="tail", description="Number of Books from end", option_type=4, required=False),
+                          create_option(name="unread", description="Include, Exclude or Exclusive read book", option_type=3, required=False, choices=[
+                                                 create_choice(name="Yes", value="yes"),
+                                                 create_choice(name="No", value="no"),
+                                                 create_choice(name="Only", value="only")]),
+                          create_option(name="sort", description="Sort the returned book by", option_type=3, required=False, choices=[
+                                                 create_choice(name="ID", value="id"),
+                                                 create_choice(name="Title", value="title"),
+                                                 create_choice(name="Author", value="author"),
+                                                 create_choice(name="Published", value="published"),
+                                                 create_choice(name="Genre", value="Genre"),
+                                                 create_choice(name="Pages", value="pages")])])
+        async def getbooklist(context: SlashContext, head: int =-1, tail: int =-1, unread: str ="yes", sort: str ="id"):
+            await context.defer()
+            await context.send(self.book_client.get_book_list(head, tail, unread, sort))
+
+        @self.slash.slash(name="getcitelist", description="Prints the Cite-Database", options=[])
+        async def getcitelist(context: SlashContext):
+            pass
+
+        @self.slash.slash(name="addbook", description="Add a book to the BaumBot Book-Database", options=[])
+        async def addbook(context: SlashContext):
+            pass
+
+        @self.slash.slash(name="addcite", description="Add a cite to the BaumBot Cite-Database", options=[])
+        async def addcite(context: SlashContext):
+            pass
+
+        @self.slash.slash(name="removebook", description="Removes a book at a given index", options=[])
+        async def removebook(context: SlashContext):
+            pass
+
+        @self.slash.slash(name="removecite", description="Removes a cite at a given index", options=[])
+        async def removecite(context: SlashContext):
+            pass
+
+        @self.slash.slash(name="markread", description="Mark a book at given index as read")
+        async def markread(context: SlashContext):
+            pass
+            #If already read mark as unread
+
+
         #Random client calls
         @self.slash.slash(name="randomnumber", description="Returns a random number", options=[
                           create_option(name="min", description="lowest possible number", option_type=4, required=False),
                           create_option(name="max", description="highest possible number", option_type=4, required=False)])
         async def randomnumber(context: SlashContext, min: int =0, max: int = 1):
             await context.send(self.random_client.get_random_number(min, max))
-
         #Porn client calls
         #TODO Random porn <website>
         #TODO Random category <get links: yes/no>
@@ -173,7 +222,7 @@ class BaumBot:
         #TODO get crypto graph <crypto name> <time [today, week, month, year, 5year, all]>
         #TODO get top flop of the day
         #TODO cash converter
-        #Finance system? <- pls no im a virign
+        #Finance system? <- pls no, im a virign
 
         #Discord Bot Games (TicTacToe, Chess, etc) calls?
         #TODO TicTacToe
@@ -181,8 +230,7 @@ class BaumBot:
                           create_option(name="getboard", description="gets the current board", option_type=5, required=False),
                           create_option(name="makeboard", description="creates a board from given string", option_type=3, required=False),
                           create_option(name="clearboard", description="clears the current board image", option_type=5, required=False),
-                          create_option(name="draw", description="draws the next character on given space", option_type=3, required=False)
-        ])
+                          create_option(name="draw", description="draws the next character on given space", option_type=3, required=False)])
         async def ttt(context: SlashContext, getboard: bool =False, makeboard: str ='', clearboard: bool =False, draw: str ='x0'):
             if clearboard:
                 await context.send(file=self.ttt_client.clear_board())

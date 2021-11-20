@@ -2,7 +2,9 @@ import os
 import praw
 import random
 import discord
+import sqlite3
 import youtube_dl
+import pandas as pd
 from PIL import Image, ImageDraw, ImageFilter
 
 class RedditClient:
@@ -180,9 +182,11 @@ class RandomClient:
             higher = lower + 1
         return str(random.randint(int(lower), int(higher)))
 
+
+
 class TicTacToeClient:
     def __init__(self):
-        _ = self.clear_board()
+        self.clear_board()
         self.coordinates = [[0, 0], [100, 0], [200, 0], [0, 100], [100, 100], [200, 100], [0, 200], [100, 200], [200, 200]]
         self.current_pos_string = '---------'
         self.board_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\board.png')
@@ -190,7 +194,7 @@ class TicTacToeClient:
         self.x_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\cross.png')
         self.o_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\circle.png')
 
-    def get_board(self, pos_string='', error=False, occupied=False):
+    def get_board(self, pos_string='', error=False, occupied=False): #TODO dont redraw
         if len(pos_string) > 9 or error:
             with open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\error.png', "rb") as f:
                 file = discord.File(f, filename=str(os.getcwd()) + '\\games\\tictactoe\\assets\\error.png')
@@ -200,22 +204,12 @@ class TicTacToeClient:
                 file = discord.File(f, filename=str(os.getcwd()) + '\\games\\tictactoe\\assets\\occupied.png')
             return file
 
-        self.make_board(pos_string)
+        self._make_board(pos_string)
 
         file_name = str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png'
         with open(file_name, "rb") as f:
             file = discord.File(f, filename=file_name)
         return file
-
-
-    def make_board(self, pos_string):
-        for i, pos in enumerate(pos_string):
-            if pos == 'x':
-                self.current_board_image.paste(self.x_image, (self.coordinates[i][0], self.coordinates[i][1]), self.x_image)
-                self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
-            elif pos == 'o':
-                self.current_board_image.paste(self.o_image, (self.coordinates[i][0], self.coordinates[i][1]), self.o_image)
-                self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
 
     def clear_board(self):
         self.current_board_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\board.png')
@@ -242,9 +236,9 @@ class TicTacToeClient:
             return self.get_board(occupied=True)
 
         if position[0] == 'x':
-            self.put_symbol_in_current_pos_string('x', field_nr)
+            self._put_symbol_in_current_pos_string('x', field_nr)
         elif position[0] == 'o':
-            self.put_symbol_in_current_pos_string('o', field_nr)
+            self._put_symbol_in_current_pos_string('o', field_nr)
         else:
             print("TTT symbol was neither x nor o")
             return self.get_board(error=True)
@@ -254,10 +248,65 @@ class TicTacToeClient:
     def game_over(self):
         pass #TODO
 
-    def put_symbol_in_current_pos_string(self, symbol, position):
+    def _make_board(self, pos_string):
+        if(len(pos_string) == 9):
+            self.current_board_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\board.png')
+            self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
+            for i, pos in enumerate(pos_string):
+                if pos == 'x':
+                    self.current_board_image.paste(self.x_image, (self.coordinates[i][0], self.coordinates[i][1]), self.x_image)
+                    self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
+                elif pos == 'o':
+                    self.current_board_image.paste(self.o_image, (self.coordinates[i][0], self.coordinates[i][1]), self.o_image)
+                    self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
+
+    def _put_symbol_in_current_pos_string(self, symbol, position):
         list1 = list(self.current_pos_string)
         list1[position] = symbol
         self.current_pos_string = ''.join(list1)
+
+class BookClient:
+    def __init__(self):
+        self.book_db = sqlite3.connect('databases/books.db')
+
+    def get_book_list(self, head=-1, tail=-1, unread="yes", sort="id"):
+        result = "```ID | Title                        | Author                        | Published | Genre                        | Pages | Comment\n"
+        cursor = self.book_db.execute("SELECT ID, TITLE, AUTHOR, PUBLISHED, GENRE, PAGES, COMMENT FROM BOOK")
+        distances = [3, 29, 30, 10, 29, 6, 20]
+
+        for row in cursor:
+            for i, cell in enumerate(row):
+                if row:
+                    result += str(cell) + (" " * (distances[i] - len(str(cell)))) + "| "
+                else:
+                    result += "-" + (" " * (distances[i] - len("-"))) + "| "
+            result += "\n"
+
+        result += "```"
+        return result
+
+    def get_cite_list(self, tail=-1):
+        pass
+
+    def add_book_to_db(self, title, author=None, link=None, year=None):
+        pass
+
+    def add_cite_to_db(self, cite, book_title=None):
+        pass
+
+    def remove_book_from_db(self, index):
+        pass
+
+    def remove_cite_from_db(self, index):
+        pass
+
+    #Net so wichtig!
+    def get_unread_books(self, username):
+        pass
+
+    def mark_as_read(self, username, book):
+        pass
+
 
 class PornClient:
     def __init__(self):
