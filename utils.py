@@ -1,3 +1,5 @@
+import discord
+
 async def check_and_join(voice_channel, context, on_join=False):
     #If the author is not in any voice channel
     if not context.author.voice:
@@ -14,7 +16,9 @@ async def check_and_join(voice_channel, context, on_join=False):
     await check_and_leave(voice_channel)
     if on_join: #Otherwhise another call would be marked as responded
         await context.send('I am joining: "{}"'.format(context.author.voice.channel.name))
-    return await context.author.voice.channel.connect()
+    voice_channel = await context.author.voice.channel.connect()
+    # voice_channel.play(discord.FFmpegPCMAudio('misc/smol.mp3'))
+    return voice_channel
 
 async def check_and_leave(voice_channel):
     if voice_channel != None:

@@ -3,8 +3,8 @@ import praw
 import random
 import discord
 import sqlite3
+import asyncio
 import youtube_dl
-import pandas as pd
 from PIL import Image, ImageDraw, ImageFilter
 
 class RedditClient:
@@ -136,40 +136,42 @@ class MusicClient:
         	'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
         }
         self.youtube = youtube_dl.YoutubeDL(ydl_opts)
+        self.queue = []
 
     #TODO wrong link -> Marek!
     #TODO adult warning! -> nice cock!
 
     def play(self, voice_channel, url):
-        #Differenciate between youtube and spotify
-        if voice_channel.is_paused:
-            voice_channel.resume()
-            voice_channel.stop()
-        elif voice_channel.is_playing:
-            voice_channel.stop()
-            #What about the queue
-
+        #TODO Differenciate between youtube and spotify
         with self.youtube as ydl:
             info = ydl.extract_info(url, download=False)
             get_url = info['url']
-            voice_channel.play(discord.FFmpegPCMAudio(get_url))
-
-            return info['title']
+            try:
+                voice_channel.play(discord.FFmpegPCMAudio(get_url), after=lambda x=0: self._play_next_song(voice_channel))
+                return "Now playing: " + info['title']
+            except:
+                self.queue.append(get_url)
+                return "Added to queue"
+            #return "Deamon: " + str(voice_channel._player.daemon) + "\n" + "Source: " + str(voice_channel._player.source)
 
     def pause(self, voice_channel):
         if voice_channel.is_playing:
-            voice_channel.pause() #Check things
-        #not pausable mesage?
+            voice_channel.pause() #Check things <- wat?
 
     def resume(self, voice_channel):
         if voice_channel.is_paused:
             voice_channel.resume()
-        #not resumable message
 
     def stop(self, voice_channel):
         if voice_channel.is_playing:
             voice_channel.stop() #What about the queue
-        #not stoppable
+
+        return "Status: " + str(voice_channel.is_playing)
+
+    def _play_next_song(self, voice_channel):
+        if len(self.queue) > 0:
+            get_url = self.queue.pop(0)
+            voice_channel.play(discord.FFmpegPCMAudio(get_url), after=lambda x=0: self._play_next_song(voice_channel))
 
 class RandomClient:
     def __init__(self):
@@ -181,8 +183,6 @@ class RandomClient:
         if higher <= lower:
             higher = lower + 1
         return str(random.randint(int(lower), int(higher)))
-
-
 
 class TicTacToeClient:
     def __init__(self):
@@ -306,7 +306,6 @@ class BookClient:
 
     def mark_as_read(self, username, book):
         pass
-
 
 class PornClient:
     def __init__(self):

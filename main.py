@@ -50,6 +50,7 @@ class BaumBot:
         #DEBUG commands
         @self.slash.slash(name="test", description="A simple test function")
         async def test(context: SlashContext):
+            await context.defer()
             await context.send('callback from client')
 
         @self.slash.slash(name="ping", description="Speed Test for the BaumBot")
@@ -131,7 +132,7 @@ class BaumBot:
             self.voice_channel = await utils.check_and_join(self.voice_channel, context)
             await context.defer()
             title = self.music_client.play(self.voice_channel, url)
-            await context.send("Now playing: " + title)
+            await context.send(title)
 
         @self.slash.slash(name="pause", description="Stops the current playing song")
         async def pause(context: SlashContext):
@@ -151,11 +152,15 @@ class BaumBot:
             self.music_client.stop(self.voice_channel)
             await context.send("(jazz music stops)")
 
-        #TODO Queue -> push -> yeet -> delete
+        #TODO push to queue -> simply /play if playing
+        #TODO show queue
+        #TODO next
+        #TODO Repeat: count
+        #TODO clearqueue
+
         #TODO Spotify Ingetration
-        #TODO Repeat
         #TODO radio <genre>
-        #TODO play soundfile
+        #TODO add sfx
 
 
         #Book client calls
