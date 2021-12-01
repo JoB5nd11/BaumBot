@@ -161,6 +161,7 @@ class BaumBot:
         #TODO Spotify Ingetration
         #TODO radio <genre>
         #TODO add sfx
+        #TODO add r34 bot ;)
 
 
         #Book client calls
