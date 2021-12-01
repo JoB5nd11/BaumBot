@@ -9,6 +9,7 @@ import time
 import utils
 import responses
 import clients
+import r34
 
 class BaumBot:
     def __init__(self, token=None):
@@ -183,7 +184,7 @@ class BaumBot:
         @self.slash.slash(name="randomr34", description="Gives back random r34 post", guild_ids=self.guild_ids)
         async def randomr34(context: SlashContext):
             await context.defer()
-            await context.send("random r34 post")
+            await context.send(r34.getr34img())
 
         #TODO push to queue -> simply /play if playing
         #TODO show queue
