@@ -152,6 +152,11 @@ class BaumBot:
             self.music_client.stop(self.voice_channel)
             await context.send("(jazz music stops)")
 
+        @self.slash.slash(name="randomr34", description="Gives back random r34 post")
+        async def randomr34(context: SlashContext):
+            await context.defer()
+            await context.send("[random r34 post]")
+
         #TODO push to queue -> simply /play if playing
         #TODO show queue
         #TODO next
