@@ -6,7 +6,6 @@ import sqlite3
 import asyncio
 import youtube_dl
 import urllib.request as urllib2
-from bs4 import BeautifulSoup
 from PIL import Image, ImageDraw, ImageFilter
 
 class RedditClient:
