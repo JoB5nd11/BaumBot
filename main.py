@@ -16,6 +16,7 @@ class BaumBot:
 
         self.client = commands.Bot(command_prefix=".")
         self.slash = SlashCommand(self.client, sync_commands=True)
+        self.guild_ids = [849279926700212294]
         self.voice_channel = None
 
         self.init_clients()
@@ -47,24 +48,22 @@ class BaumBot:
             await message.channel.send(self.responses.responde(message.content))
 
     def init_commands(self):
-
-        guild_ids = [849279926700212294]
         #DEBUG commands
-        @self.slash.slash(name="test", description="A simple test function")
+        @self.slash.slash(name="test", description="A simple test function", guild_ids=self.guild_ids)
         async def test(context: SlashContext):
             await context.defer()
             await context.send('callback from client')
 
-        @self.slash.slash(name="ping", description="Speed Test for the BaumBot")
+        @self.slash.slash(name="ping", description="Speed Test for the BaumBot", guild_ids=self.guild_ids)
         async def ping(context: SlashContext):
             await context.send('BaumBot Speed: {}ms'.format(round(self.client.latency * 1000), 0))
 
-        @self.slash.slash(name="shutdown", description="Shuts down the BaumBot. Cannot be undone!")
+        @self.slash.slash(name="shutdown", description="Shuts down the BaumBot. Cannot be undone!", guild_ids=self.guild_ids)
         async def shutdown(context: SlashContext):
             await context.send('Goodbye 👋')
             quit()
 
-        @self.slash.slash(name="clear", description="Clears the current screen")
+        @self.slash.slash(name="clear", description="Clears the current screen", guild_ids=self.guild_ids)
         async def shutdown(context: SlashContext):
             answer = "."
             for _ in range(100):
@@ -74,11 +73,11 @@ class BaumBot:
 
 
         #Channel commands
-        @self.slash.slash(name="join", description="BaumBot joins the channel of the command author")
+        @self.slash.slash(name="join", description="BaumBot joins the channel of the command author", guild_ids=self.guild_ids)
         async def join(context: SlashContext):
             self.voice_channel = await utils.check_and_join(self.voice_channel, context, on_join=True)
 
-        @self.slash.slash(name="leave", description="BaumBot leaves its current voice channel")
+        @self.slash.slash(name="leave", description="BaumBot leaves its current voice channel", guild_ids=self.guild_ids)
         async def leave(context: SlashContext):
             await utils.check_and_leave(self.voice_channel)
             await context.send('I am leaving: "{}"'.format(context.author.voice.channel.name))
@@ -86,7 +85,7 @@ class BaumBot:
 
 
         #Reddit client calls
-        @self.slash.slash(name="randomsubreddit", description="Gives back a random subreddit link",
+        @self.slash.slash(name="randomsubreddit", description="Gives back a random subreddit link", guild_ids=self.guild_ids,
                           options=[create_option(name="nsfw", description="Include, Exclude or Exclusive NSFW", option_type=3, required=False, choices=[
                                                  create_choice(name="Yes", value="yes"),
                                                  create_choice(name="No", value="no"),
@@ -104,7 +103,7 @@ class BaumBot:
             await context.defer()
             await context.send(self.reddit_client.get_random_subreddit(NSFW=nsfw, count=count, sort=sort))
 
-        @self.slash.slash(name="randomredditpost", description="Gives back a random reddit post",
+        @self.slash.slash(name="randomredditpost", description="Gives back a random reddit post", guild_ids=self.guild_ids,
                           options=[create_option(name="nsfw", description="Include, Exclude or Exclusive NSFW", option_type=3, required=False, choices=[
                                                 create_choice(name="Yes", value="yes"),
                                                 create_choice(name="No", value="no"),
@@ -121,13 +120,13 @@ class BaumBot:
             await context.defer()
             await context.send(self.reddit_client.get_random_post(NSFW=nsfw, count=count, images=images))
 
-        @self.slash.slash(name="memesoftheday", description="Gives the 5 best memes of the day")
+        @self.slash.slash(name="memesoftheday", description="Gives the 5 best memes of the day", guild_ids=self.guild_ids)
         async def memesoftheday(context: SlashContext):
             await context.defer()
             await context.send(self.reddit_client.get_memes_of_the_day())
 
         #Music client calls
-        @self.slash.slash(name="play", description="Plays music from given link",
+        @self.slash.slash(name="play", description="Plays music from given link", guild_ids=self.guild_ids,
                           options=[create_option(name="url", description="The Url of the music website", option_type=3, required=True)])
         async def play(context: SlashContext, url: str):
             self.voice_channel = await utils.check_and_join(self.voice_channel, context)
@@ -135,45 +134,45 @@ class BaumBot:
             title = self.music_client.play(self.voice_channel, url)
             await context.send(title)
 
-        @self.slash.slash(name="pause", description="Stops the current playing song")
+        @self.slash.slash(name="pause", description="Stops the current playing song", guild_ids=self.guild_ids)
         async def pause(context: SlashContext):
             await context.defer()
             self.music_client.pause(self.voice_channel)
             await context.send("Now Paused!")
 
-        @self.slash.slash(name="resume", description="Stops the current playing song")
+        @self.slash.slash(name="resume", description="Stops the current playing song", guild_ids=self.guild_ids)
         async def resume(context: SlashContext):
             await context.defer()
             self.music_client.resume(self.voice_channel)
             await context.send("Resumed...")
 
-        @self.slash.slash(name="stop", description="Stops the current playing song")
+        @self.slash.slash(name="stop", description="Stops the current playing song", guild_ids=self.guild_ids)
         async def stop(context: SlashContext):
             await context.defer()
             self.music_client.stop(self.voice_channel)
             await context.send("(jazz music stops)")
 
-        @self.slash.slash(name="currentsong", description="Show the currently playing song")
+        @self.slash.slash(name="currentsong", description="Show the currently playing song", guild_ids=self.guild_ids)
         async def currentsong(context: SlashContext):
             await context.defer()
             await context.send(self.music_client.current_song)
 
-        @self.slash.slash(name="printqueue", description="Show all the song that are in queue")
+        @self.slash.slash(name="printqueue", description="Show all the song that are in queue", guild_ids=self.guild_ids)
         async def printqueue(context: SlashContext):
             await context.defer()
             await context.send(self.music_client.print_queue())
 
-        @self.slash.slash(name="clearqueue", description="Clears the current queue")
+        @self.slash.slash(name="clearqueue", description="Clears the current queue", guild_ids=self.guild_ids)
         async def clearqueue(context: SlashContext):
             await context.defer()
             await context.send(self.music_client.clear_queue())
 
-        @self.slash.slash(name="nextsong", description="Stops the current song and plays the next in the queue")
+        @self.slash.slash(name="nextsong", description="Stops the current song and plays the next in the queue", guild_ids=self.guild_ids)
         async def nextsong(context: SlashContext):
             await context.defer()
             await context.send(self.music_client.next_song(self.voice_channel))
 
-        @self.slash.slash(name="repeatcurrentsong", description="Repeats the current song a given number of times",
+        @self.slash.slash(name="repeatcurrentsong", description="Repeats the current song a given number of times", guild_ids=self.guild_ids,
                           options=[create_option(name="count", description="numbers of times the song should be repeated", option_type=4, required=True)])
         async def repeatcurrentsong(context: SlashContext, count: int =0):
             await context.defer()
@@ -181,7 +180,7 @@ class BaumBot:
 
         #TODO add full playlists
         #TODO get current playing
-        @self.slash.slash(name="randomr34", description="Gives back random r34 post")
+        @self.slash.slash(name="randomr34", description="Gives back random r34 post", guild_ids=self.guild_ids)
         async def randomr34(context: SlashContext):
             await context.defer()
             await context.send("random r34 post")
@@ -198,7 +197,7 @@ class BaumBot:
         #TODO add r34 bot ;)
 
         #Book client calls
-        @self.slash.slash(name="getbooklist", description="Prints the Book-Database",
+        @self.slash.slash(name="getbooklist", description="Prints the Book-Database", guild_ids=self.guild_ids,
                           options=[create_option(name="head", description="Number of Books from start", option_type=4, required=False),
                                    create_option(name="tail", description="Number of Books from end", option_type=4, required=False),
                                    create_option(name="unread", description="Include, Exclude or Exclusive read book", option_type=3, required=False, choices=[
@@ -220,31 +219,31 @@ class BaumBot:
         # async def getcitelist(context: SlashContext):
         #     pass
 
-        @self.slash.slash(name="addbook", description="Add a book to the BaumBot Book-Database",
-                          options=[create_option(name="title", description="Title of the book", option_type=3, required=True),
-                                   create_option(name="author", description="Author of the book", option_type=3, required=False),
-                                   create_option(name="published", description="Year of publishing of the book", option_type=4, required=False),
-                                   create_option(name="genre", description="Genre of the book (if genre not present do 'owngenre')", option_type=4, required=False, choices=[
-                                                 create_choice(name="Fantasy", value="Fantasy"),
-                                                 create_choice(name="SciFi", value="SciFi"),
-                                                 create_choice(name="Dystopian", value="Dystopian"),
-                                                 create_choice(name="Action & Adventure", value="Action & Adventure"),
-                                                 create_choice(name="Horror", value="Horror"),
-                                                 create_choice(name="Thriller & Suspense", value="Thriller & Suspense"),
-                                                 create_choice(name="Romance", value="Romance")#TODO
-                                   ]),
-                                   create_option(name="owngenre", description="An own genre because it was not in the genre list", option_type=3, required=False),
-                                   create_option(name="pages", description="Number of pages of the book", option_type=4, required=False),
-                                   create_option(name="comment", description="Your comment to the book", option_type=4, required=False)])
-        async def addbook(context: SlashContext):
-            #ID, TITLE, AUTHOR, PUBLISHED, GENRE, PAGES, COMMENT
-            pass
+        # @self.slash.slash(name="addbook", description="Add a book to the BaumBot Book-Database", guild_ids=self.guild_ids,
+        #                   options=[create_option(name="title", description="Title of the book", option_type=3, required=True),
+        #                            create_option(name="author", description="Author of the book", option_type=3, required=False),
+        #                            create_option(name="published", description="Year of publishing of the book", option_type=4, required=False),
+        #                            create_option(name="genre", description="Genre of the book (if genre not present do 'owngenre')", option_type=4, required=False, choices=[
+        #                                          create_choice(name="Fantasy", value="Fantasy"),
+        #                                          create_choice(name="SciFi", value="SciFi"),
+        #                                          create_choice(name="Dystopian", value="Dystopian"),
+        #                                          create_choice(name="Action & Adventure", value="Action & Adventure"),
+        #                                          create_choice(name="Horror", value="Horror"),
+        #                                          create_choice(name="Thriller & Suspense", value="Thriller & Suspense"),
+        #                                          create_choice(name="Romance", value="Romance")#TODO
+        #                            ]),
+        #                            create_option(name="owngenre", description="An own genre because it was not in the genre list", option_type=3, required=False),
+        #                            create_option(name="pages", description="Number of pages of the book", option_type=4, required=False),
+        #                            create_option(name="comment", description="Your comment to the book", option_type=4, required=False)])
+        # async def addbook(context: SlashContext):
+        #     #ID, TITLE, AUTHOR, PUBLISHED, GENRE, PAGES, COMMENT
+        #     pass
 
         # @self.slash.slash(name="addcite", description="Add a cite to the BaumBot Cite-Database", options=[])
         # async def addcite(context: SlashContext):
         #     pass
 
-        @self.slash.slash(name="removebook", description="Removes a book at a given index", options=[])
+        @self.slash.slash(name="removebook", description="Removes a book at a given index", guild_ids=self.guild_ids, options=[])
         async def removebook(context: SlashContext):
             pass
 
@@ -252,14 +251,14 @@ class BaumBot:
         # async def removecite(context: SlashContext):
         #     pass
 
-        @self.slash.slash(name="markread", description="Mark a book at given index as read")
+        @self.slash.slash(name="markread", description="Mark a book at given index as read", guild_ids=self.guild_ids)
         async def markread(context: SlashContext):
             pass
             #If already read mark as unread
 
 
         #Random client calls
-        @self.slash.slash(name="randomnumber", description="Returns a random number", options=[
+        @self.slash.slash(name="randomnumber", description="Returns a random number", guild_ids=self.guild_ids, options=[
                           create_option(name="min", description="lowest possible number", option_type=4, required=False),
                           create_option(name="max", description="highest possible number", option_type=4, required=False)])
         async def randomnumber(context: SlashContext, min: int =0, max: int = 1):
@@ -282,7 +281,7 @@ class BaumBot:
 
         #Discord Bot Games (TicTacToe, Chess, etc) calls?
         #TODO TicTacToe
-        @self.slash.slash(name="ttt", description="Return a image", options=[
+        @self.slash.slash(name="ttt", description="Return a image", guild_ids=self.guild_ids, options=[
                           create_option(name="getboard", description="gets the current board", option_type=5, required=False),
                           create_option(name="makeboard", description="creates a board from given string", option_type=3, required=False),
                           create_option(name="clearboard", description="clears the current board image", option_type=5, required=False),
