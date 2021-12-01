@@ -47,6 +47,8 @@ class BaumBot:
             await message.channel.send(self.responses.responde(message.content))
 
     def init_commands(self):
+
+        guild_ids = [849279926700212294]
         #DEBUG commands
         @self.slash.slash(name="test", description="A simple test function")
         async def test(context: SlashContext):
