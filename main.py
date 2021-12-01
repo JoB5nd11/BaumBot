@@ -124,7 +124,6 @@ class BaumBot:
             await context.defer()
             await context.send(self.reddit_client.get_memes_of_the_day())
 
-
         #Music client calls
         @self.slash.slash(name="play", description="Plays music from given link",
                           options=[create_option(name="url", description="The Url of the music website", option_type=3, required=True)])
@@ -152,26 +151,48 @@ class BaumBot:
             self.music_client.stop(self.voice_channel)
             await context.send("(jazz music stops)")
 
-        #TODO push to queue -> simply /play if playing
-        #TODO show queue
-        #TODO next
-        #TODO Repeat: count
-        #TODO clearqueue
+        @self.slash.slash(name="currentsong", description="Show the currently playing song")
+        async def currentsong(context: SlashContext):
+            await context.defer()
+            await context.send(self.music_client.current_song)
+
+        @self.slash.slash(name="printqueue", description="Show all the song that are in queue")
+        async def printqueue(context: SlashContext):
+            await context.defer()
+            await context.send(self.music_client.print_queue())
+
+        @self.slash.slash(name="clearqueue", description="Clears the current queue")
+        async def clearqueue(context: SlashContext):
+            await context.defer()
+            await context.send(self.music_client.clear_queue())
+
+        @self.slash.slash(name="nextsong", description="Stops the current song and plays the next in the queue")
+        async def nextsong(context: SlashContext):
+            await context.defer()
+            await context.send(self.music_client.next_song(self.voice_channel))
+
+        @self.slash.slash(name="repeatcurrentsong", description="Repeats the current song a given number of times",
+                          options=[create_option(name="count", description="numbers of times the song should be repeated", option_type=4, required=True)])
+        async def repeatcurrentsong(context: SlashContext, count: int =0):
+            await context.defer()
+            await context.send(self.music_client.repeat_current_song(count))
+
+        #TODO add full playlists
+        #TODO get current playing
 
         #TODO Spotify Ingetration
         #TODO radio <genre>
         #TODO add sfx
 
-
         #Book client calls
-        @self.slash.slash(name="getbooklist", description="Prints the Book-Database", options=[
-                          create_option(name="head", description="Number of Books from start", option_type=4, required=False),
-                          create_option(name="tail", description="Number of Books from end", option_type=4, required=False),
-                          create_option(name="unread", description="Include, Exclude or Exclusive read book", option_type=3, required=False, choices=[
+        @self.slash.slash(name="getbooklist", description="Prints the Book-Database",
+                          options=[create_option(name="head", description="Number of Books from start", option_type=4, required=False),
+                                   create_option(name="tail", description="Number of Books from end", option_type=4, required=False),
+                                   create_option(name="unread", description="Include, Exclude or Exclusive read book", option_type=3, required=False, choices=[
                                                  create_choice(name="Yes", value="yes"),
                                                  create_choice(name="No", value="no"),
                                                  create_choice(name="Only", value="only")]),
-                          create_option(name="sort", description="Sort the returned book by", option_type=3, required=False, choices=[
+                                    create_option(name="sort", description="Sort the returned book by", option_type=3, required=False, choices=[
                                                  create_choice(name="ID", value="id"),
                                                  create_choice(name="Title", value="title"),
                                                  create_choice(name="Author", value="author"),
@@ -182,25 +203,41 @@ class BaumBot:
             await context.defer()
             await context.send(self.book_client.get_book_list(head, tail, unread, sort))
 
-        @self.slash.slash(name="getcitelist", description="Prints the Cite-Database", options=[])
-        async def getcitelist(context: SlashContext):
-            pass
+        # @self.slash.slash(name="getcitelist", description="Prints the Cite-Database", options=[])
+        # async def getcitelist(context: SlashContext):
+        #     pass
 
-        @self.slash.slash(name="addbook", description="Add a book to the BaumBot Book-Database", options=[])
+        @self.slash.slash(name="addbook", description="Add a book to the BaumBot Book-Database",
+                          options=[create_option(name="title", description="Title of the book", option_type=3, required=True),
+                                   create_option(name="author", description="Author of the book", option_type=3, required=False),
+                                   create_option(name="published", description="Year of publishing of the book", option_type=4, required=False),
+                                   create_option(name="genre", description="Genre of the book (if genre not present do 'owngenre')", option_type=4, required=False, choices=[
+                                                 create_choice(name="Fantasy", value="Fantasy"),
+                                                 create_choice(name="SciFi", value="SciFi"),
+                                                 create_choice(name="Dystopian", value="Dystopian"),
+                                                 create_choice(name="Action & Adventure", value="Action & Adventure"),
+                                                 create_choice(name="Horror", value="Horror"),
+                                                 create_choice(name="Thriller & Suspense", value="Thriller & Suspense"),
+                                                 create_choice(name="Romance", value="Romance")#TODO
+                                   ]),
+                                   create_option(name="owngenre", description="An own genre because it was not in the genre list", option_type=3, required=False),
+                                   create_option(name="pages", description="Number of pages of the book", option_type=4, required=False),
+                                   create_option(name="comment", description="Your comment to the book", option_type=4, required=False)])
         async def addbook(context: SlashContext):
+            #ID, TITLE, AUTHOR, PUBLISHED, GENRE, PAGES, COMMENT
             pass
 
-        @self.slash.slash(name="addcite", description="Add a cite to the BaumBot Cite-Database", options=[])
-        async def addcite(context: SlashContext):
-            pass
+        # @self.slash.slash(name="addcite", description="Add a cite to the BaumBot Cite-Database", options=[])
+        # async def addcite(context: SlashContext):
+        #     pass
 
         @self.slash.slash(name="removebook", description="Removes a book at a given index", options=[])
         async def removebook(context: SlashContext):
             pass
 
-        @self.slash.slash(name="removecite", description="Removes a cite at a given index", options=[])
-        async def removecite(context: SlashContext):
-            pass
+        # @self.slash.slash(name="removecite", description="Removes a cite at a given index", options=[])
+        # async def removecite(context: SlashContext):
+        #     pass
 
         @self.slash.slash(name="markread", description="Mark a book at given index as read")
         async def markread(context: SlashContext):
@@ -214,6 +251,7 @@ class BaumBot:
                           create_option(name="max", description="highest possible number", option_type=4, required=False)])
         async def randomnumber(context: SlashContext, min: int =0, max: int = 1):
             await context.send(self.random_client.get_random_number(min, max))
+
         #Porn client calls
         #TODO Random porn <website>
         #TODO Random category <get links: yes/no>

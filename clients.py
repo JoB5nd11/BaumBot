@@ -5,6 +5,8 @@ import discord
 import sqlite3
 import asyncio
 import youtube_dl
+import urllib.request as urllib2
+from bs4 import BeautifulSoup
 from PIL import Image, ImageDraw, ImageFilter
 
 class RedditClient:
@@ -137,22 +139,28 @@ class MusicClient:
         }
         self.youtube = youtube_dl.YoutubeDL(ydl_opts)
         self.queue = []
-
-    #TODO wrong link -> Marek!
-    #TODO adult warning! -> nice cock!
+        self.current_song = ""
+        self._current_url = ""
 
     def play(self, voice_channel, url):
         #TODO Differenciate between youtube and spotify
+        if "youtu.be" in url:
+            url = "https://www.youtube.com/watch?v=" + url.split("/")[-1]
+
+        if "&list=" in url:
+            pass # add whole playlist to queue from current song
+
         with self.youtube as ydl:
             info = ydl.extract_info(url, download=False)
             get_url = info['url']
             try:
                 voice_channel.play(discord.FFmpegPCMAudio(get_url), after=lambda x=0: self._play_next_song(voice_channel))
-                return "Now playing: " + info['title']
+                self.current_song = info['title']
+                self._current_url = url
+                return 'Now playing: "' + info['title'] + '"'
             except:
-                self.queue.append(get_url)
-                return "Added to queue"
-            #return "Deamon: " + str(voice_channel._player.daemon) + "\n" + "Source: " + str(voice_channel._player.source)
+                self.queue.append(url)
+                return 'Added "' + info['title'] + '" to queue'
 
     def pause(self, voice_channel):
         if voice_channel.is_playing:
@@ -166,11 +174,49 @@ class MusicClient:
         if voice_channel.is_playing:
             voice_channel.stop() #What about the queue
 
-        return "Status: " + str(voice_channel.is_playing)
+    def print_queue(self):
+        result = ""
+        for i, url in enumerate(self.queue):
+            with self.youtube as ydl:
+                info = ydl.extract_info(url, download=False)
+                result += i + ": " + info['title'] + "\n"
+
+        if result == "":
+            result = "no songs in queue"
+
+        return result
+
+    def clear_queue(self):
+        length = len(self.queue)
+        self.queue = []
+        return "Cleared {} songs".format(length)
+
+    def next_song(self, voice_channel):
+        voice_channel.stop()
+        self._play_next_song(voice_channel)
+        return "Jumped to next song"
+
+    def repeat_current_song(self, count):
+        new_queue = []
+        for c in count:
+            new_queue.append(self._current_url)
+
+        new_queue += self.queue
+        self.queue = new_queue
+
+        return "Current song now {} times in queue".format(count)
 
     def _play_next_song(self, voice_channel):
+        self.current_song = "Not playing anything"
         if len(self.queue) > 0:
-            get_url = self.queue.pop(0)
+            url = self.queue.pop(0)
+
+            with self.youtube as ydl:
+                info = ydl.extract_info(url, download=False)
+                get_url = info['url']
+
+            self.current_song = info['title']
+            self._current_url = url
             voice_channel.play(discord.FFmpegPCMAudio(get_url), after=lambda x=0: self._play_next_song(voice_channel))
 
 class RandomClient:
