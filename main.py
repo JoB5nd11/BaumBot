@@ -181,10 +181,11 @@ class BaumBot:
 
         #TODO add full playlists
         #TODO get current playing
-        @self.slash.slash(name="randomr34", description="Gives back random r34 post", guild_ids=self.guild_ids)
-        async def randomr34(context: SlashContext):
+        @self.slash.slash(name="randomr34", description="Gives back random r34 post", guild_ids=self.guild_ids,
+        options=[create_option(name="search", description="Different tags to narrow the search down", option_type=3, required=True)])
+        async def randomr34(context: SlashContext, search:str="boobs"):
             await context.defer()
-            await context.send(r34.getr34img())
+            await context.send(r34.getr34img(search))
 
         #TODO push to queue -> simply /play if playing
         #TODO show queue

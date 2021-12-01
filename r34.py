@@ -1,10 +1,11 @@
 import rule34
 import random
 
-r34 = rule34.Sync()
-images = r34.getImages("gay mario")
+def getr34img(search):
 
-def getr34img():
+    r34 = rule34.Sync()
+    images = r34.getImages(search)
+
     links = []
 
     for img in images:
