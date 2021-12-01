@@ -4,6 +4,7 @@ import random
 import discord
 import sqlite3
 import asyncio
+import rule34 # reference https://github.com/LordOfPolls/Rule34-API-Wrapper
 import youtube_dl
 import urllib.request as urllib2
 from PIL import Image, ImageDraw, ImageFilter
