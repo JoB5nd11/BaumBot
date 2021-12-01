@@ -155,7 +155,7 @@ class BaumBot:
         @self.slash.slash(name="randomr34", description="Gives back random r34 post")
         async def randomr34(context: SlashContext):
             await context.defer()
-            await context.send("[random r34 post]")
+            await context.send("random r34 post")
 
         #TODO push to queue -> simply /play if playing
         #TODO show queue
