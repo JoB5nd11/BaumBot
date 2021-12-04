@@ -10,6 +10,9 @@ def getr34img(search):
 
     links = []
 
+    if len(images) == 0:
+        return "No images found"
+
     for img in images:
         links.append(img.preview_url)
 
