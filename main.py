@@ -179,12 +179,19 @@ class BaumBot:
             await context.defer()
             await context.send(self.music_client.repeat_current_song(count))
 
+
+
         #Random Rule34 post
         @self.slash.slash(name="randomr34", description="Gives back random r34 post", guild_ids=self.guild_ids,
-        options=[create_option(name="search", description="Different tags to narrow the search down", option_type=3, required=True)])
-        async def randomr34(context: SlashContext, search:str="boobs"):
+        options=[create_option(name="search", description="Keyword for the search", option_type=3, required=False),
+                 create_option(name="gay", description="Can search be gay", option_type=5, required=False),
+                 create_option(name="hentai", description="Can search be Hentai", option_type=5, required=False),
+                 create_option(name="animated", description="Can search be animated", option_type=5, required=False),
+                 create_option(name="drawing", description="Can search be drawn", option_type=5, required=False),
+                 create_option(name="comic", description="Can search be a Comic", option_type=5, required=False)])
+        async def randomr34(context: SlashContext, search:str="levi", gay:bool= None, hentai:bool= None, animated:bool= None, drawing:bool= None, comic:bool= None):
             await context.defer()
-            await context.send(r34.getr34img(search))
+            await context.send(r34.getr34img(search, gay, hentai, animated, drawing, comic))
 
 
         #TODO add full playlists
