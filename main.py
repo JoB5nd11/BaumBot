@@ -101,7 +101,7 @@ class BaumBot:
                                                  create_choice(name="TopAll", value="/top/?t=all")])])
         async def randomsubreddit(context: SlashContext, nsfw: str ="yes", count: int =1, sort: str ="/top/?t=all"):
             await context.defer()
-            await context.send(self.reddit_client.get_random_subreddit(NSFW=nsfw, count=count, sort=sort))
+            await self.client.channels.get('849767692617515019').send(self.reddit_client.get_random_subreddit(NSFW=nsfw, count=count, sort=sort))
 
         @self.slash.slash(name="randomredditpost", description="Gives back a random reddit post",
                           options=[create_option(name="nsfw", description="Include, Exclude or Exclusive NSFW", option_type=3, required=False, choices=[
@@ -118,7 +118,7 @@ class BaumBot:
                                                  create_choice(name="No", value="no")])])
         async def randomredditpost(context: SlashContext, nsfw: str ="yes", count: int=1, images: str ="only", spoilers: str ="no"):
             await context.defer()
-            await context.send(self.reddit_client.get_random_post(NSFW=nsfw, count=count, images=images))
+            await self.client.channels.get('849767692617515019').send(self.reddit_client.get_random_post(NSFW=nsfw, count=count, images=images))
 
         @self.slash.slash(name="memesoftheday", description="Gives the 5 best memes of the day")
         async def memesoftheday(context: SlashContext):
@@ -190,7 +190,7 @@ class BaumBot:
                  create_option(name="comic", description="Can search be a Comic", option_type=5, required=False)])
         async def randomr34(context: SlashContext, search:str="levi", gay:bool= None, hentai:bool= None, animated:bool= None, drawing:bool= None, comic:bool= None):
             await context.defer()
-            await context.send(r34.getr34img(search, gay, hentai, animated, drawing, comic))
+            await self.client.channels.get('849767692617515019').send(r34.getr34img(search, gay, hentai, animated, drawing, comic))
 
 
         #TODO add full playlists
