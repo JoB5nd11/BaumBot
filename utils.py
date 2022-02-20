@@ -22,9 +22,11 @@ async def check_and_join(voice_channel, context, on_join=False):
     # voice_channel.play(discord.FFmpegPCMAudio('misc/smol.mp3'))
     return voice_channel
 
+
 async def check_and_leave(voice_channel):
     if voice_channel != None:
         await voice_channel.disconnect()
+
 
 def generate_teams(members, teams=2, fair=True):
     random.shuffle(members)

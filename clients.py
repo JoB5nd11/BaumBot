@@ -238,6 +238,8 @@ class TicTacToeClient:
         self.current_board_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
         self.x_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\cross.png')
         self.o_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\circle.png')
+        self.t_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\tri.png')
+        self.s_image = Image.open(str(os.getcwd()) + '\\games\\tictactoe\\assets\\square.png')
 
     def get_board(self, pos_string='', error=False, occupied=False): #TODO dont redraw
         if len(pos_string) > 9 or error:
@@ -254,6 +256,7 @@ class TicTacToeClient:
         file_name = str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png'
         with open(file_name, "rb") as f:
             file = discord.File(f, filename=file_name)
+
         return file
 
     def clear_board(self):
@@ -284,8 +287,12 @@ class TicTacToeClient:
             self._put_symbol_in_current_pos_string('x', field_nr)
         elif position[0] == 'o':
             self._put_symbol_in_current_pos_string('o', field_nr)
+        elif position[0] == 's':
+            self._put_symbol_in_current_pos_string('s', field_nr)
+        elif position[0] == 't':
+            self._put_symbol_in_current_pos_string('t', field_nr)
         else:
-            print("TTT symbol was neither x nor o")
+            print("TTT symbol was not in the game set")
             return self.get_board(error=True)
 
         return self.get_board(self.current_pos_string)
@@ -303,6 +310,12 @@ class TicTacToeClient:
                     self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
                 elif pos == 'o':
                     self.current_board_image.paste(self.o_image, (self.coordinates[i][0], self.coordinates[i][1]), self.o_image)
+                    self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
+                elif pos == 's':
+                    self.current_board_image.paste(self.s_image, (self.coordinates[i][0], self.coordinates[i][1]), self.s_image)
+                    self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
+                elif pos == 't':
+                    self.current_board_image.paste(self.t_image, (self.coordinates[i][0], self.coordinates[i][1]), self.t_image)
                     self.current_board_image.save(str(os.getcwd()) + '\\games\\tictactoe\\gamefiles\\currentboard.png')
 
     def _put_symbol_in_current_pos_string(self, symbol, position):
