@@ -1,4 +1,6 @@
 import discord
+import random
+import math
 
 async def check_and_join(voice_channel, context, on_join=False):
     #If the author is not in any voice channel
@@ -23,3 +25,32 @@ async def check_and_join(voice_channel, context, on_join=False):
 async def check_and_leave(voice_channel):
     if voice_channel != None:
         await voice_channel.disconnect()
+
+def generate_teams(members, teams=2, fair=True):
+    members.append('Test Member 1')
+    members.append('Test Member 2')
+    members.append('Test Member 3')
+    members.append('Test Member 4')
+    members.append('Test Member 5')
+
+    random.shuffle(members)
+    final_teams = [[] for _ in range(teams)]
+    res_string = ""
+
+    if fair:
+        for i, member in enumerate(members):
+            final_teams[i % teams].append(member)
+
+    else:
+        #fill one member in each team
+        for i in range(teams):
+            if len(members) > 0:
+                final_teams[i].append(members.pop())
+        #distr rest
+        for member in members:
+            final_teams[random.randint(0, teams - 1)].append(member)
+
+    for i, team in enumerate(final_teams):
+        res_string += f'**Team {i + 1}:** {", ".join(team)}\n'
+
+    return str(res_string)

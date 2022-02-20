@@ -272,7 +272,7 @@ class BaumBot:
         @self.slash.slash(name="randomnumber", description="Returns a random number", options=[
                           create_option(name="min", description="lowest possible number", option_type=4, required=False),
                           create_option(name="max", description="highest possible number", option_type=4, required=False)])
-        async def randomnumber(context: SlashContext, min: int =0, max: int = 1):
+        async def randomnumber(context: SlashContext, min: int = 0, max: int = 1):
             await context.send(self.random_client.get_random_number(min, max))
 
         #Porn client calls
@@ -291,7 +291,7 @@ class BaumBot:
         #Finance system? <- pls no, im a virign
 
         #Discord Bot Games (TicTacToe, Chess, etc) calls?
-        @self.slash.slash(name="ttt", description="Return a image", options=[
+        @self.slash.slash(name="ttt", description="Returns a image", options=[
                           create_option(name="getboard", description="gets the current board", option_type=5, required=False),
                           create_option(name="makeboard", description="creates a board from given string", option_type=3, required=False),
                           create_option(name="clearboard", description="clears the current board image", option_type=5, required=False),
@@ -315,7 +315,12 @@ class BaumBot:
         #Insults
 
         #TODO Team Generator
-        
+        @self.slash.slash(name="generateteams", description="Splits all attendees in 'General' into teams", options=[
+                          create_option(name="teams", description="number of teams to create", option_type=4, required=False),
+                          create_option(name="fair", description="Wether teams split should be even", option_type=5, required=False)])
+        async def generateteams(context: SlashContext, teams: int = 2, fair: bool = True):
+            member_list = [member.name for member in self.client.get_channel(849279926700212298).members if member != self.client.user]
+            await context.send(utils.generate_teams(member_list, teams, fair))
 
 
 if __name__ == '__main__':
