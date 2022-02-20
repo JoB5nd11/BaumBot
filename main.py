@@ -45,7 +45,9 @@ class BaumBot:
         async def on_message(message):
             if message.author == self.client.user:
             	return
-            await message.channel.send(self.responses.responde(message.content))
+            response = self.responses.responde(message.content)
+            if response:
+                await message.channel.send(response)
 
     def init_commands(self):
         #DEBUG commands
@@ -53,6 +55,11 @@ class BaumBot:
         async def test(context: SlashContext):
             await context.defer()
             await context.send('callback from client')
+
+        @self.slash.slash(name="lines", description="LOC of BaumBot")
+        async def lines(context: SlashContext):
+            # await context.defer()
+            await context.send(utils.calc_loc())
 
         @self.slash.slash(name="ping", description="Speed Test for the BaumBot")
         async def ping(context: SlashContext):
@@ -125,6 +132,7 @@ class BaumBot:
             await context.defer()
             await context.send(self.reddit_client.get_memes_of_the_day())
 
+
         #Music client calls
         @self.slash.slash(name="play", description="Plays music from given link",
                           options=[create_option(name="url", description="The Url of the music website", option_type=3, required=True)])
@@ -178,6 +186,15 @@ class BaumBot:
             await context.defer()
             await context.send(self.music_client.repeat_current_song(count))
 
+        #TODO add full playlists
+        #TODO get current playing
+        #TODO show queue
+        #TODO next
+        #TODO Repeat: count
+        #TODO clearqueue
+        #TODO Spotify Ingetration
+        #TODO radio <genre>
+        #TODO add sfx
 
 
         #Random Rule34 post
@@ -192,20 +209,6 @@ class BaumBot:
             await context.defer()
             await self.client.channels.get('849767692617515019').send(r34.getr34img(search, gay, hentai, animated, drawing, comic))
 
-
-        #TODO add full playlists
-        #TODO get current playing
-
-        #TODO push to queue -> simply /play if playing
-        #TODO show queue
-        #TODO next
-        #TODO Repeat: count
-        #TODO clearqueue
-
-        #TODO Spotify Ingetration
-        #TODO radio <genre>
-        #TODO add sfx
-        #TODO add r34 bot ;)
 
         #Book client calls
         @self.slash.slash(name="getbooklist", description="Prints the Book-Database",
@@ -275,11 +278,13 @@ class BaumBot:
         async def randomnumber(context: SlashContext, min: int = 0, max: int = 1):
             await context.send(self.random_client.get_random_number(min, max))
 
+
         #Porn client calls
         #TODO Random porn <website>
         #TODO Random category <get links: yes/no>
         #TODO Random porn star <get links: yes/no>
         #TODO Random porn page
+
 
         #Stock client calls?
         #TODO get stock value <stock name> <date>
@@ -290,7 +295,9 @@ class BaumBot:
         #TODO cash converter
         #Finance system? <- pls no, im a virign
 
+
         #Discord Bot Games (TicTacToe, Chess, etc) calls?
+        #TODO multiple simultanious games (ID system)
         @self.slash.slash(name="ttt", description="Returns a image", options=[
                           create_option(name="getboard", description="gets the current board", option_type=5, required=False),
                           create_option(name="makeboard", description="creates a board from given string", option_type=3, required=False),
@@ -310,11 +317,26 @@ class BaumBot:
 
         #TODO 4 gewinnt
         #TODO Chess
+        #TODO Risiko
+        #TODO Poker
+        #TODO UNO
+        #TODO Dame
+        #TODO Backgamnom
+        #TODO Monopoly
+        #TODO Mensch ärgere dich nicht
+        #TODO Snakes and Ladders
+        #TODO Slot Machine (Multiple?)
+        #TODO Minesweeper
+        #TODO Solitaire
+        #TODO Battleship
+        #TODO Rogue
 
 
         #Insults
 
-        #TODO Team Generator
+        #Russian Roulette
+
+        #Team Generator
         @self.slash.slash(name="generateteams", description="Splits all attendees in 'General' into teams", options=[
                           create_option(name="teams", description="number of teams to create", option_type=4, required=False),
                           create_option(name="fair", description="Wether teams split should be even", option_type=5, required=False)])

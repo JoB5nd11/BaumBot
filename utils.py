@@ -1,6 +1,7 @@
 import discord
 import random
 import math
+import os
 
 async def check_and_join(voice_channel, context, on_join=False):
     #If the author is not in any voice channel
@@ -50,3 +51,17 @@ def generate_teams(members, teams=2, fair=True):
         res_string += f'**Team {i + 1}:** {", ".join(team)}\n'
 
     return str(res_string)
+
+
+def calc_loc():
+    filename_list = []
+    linescounter = 0
+
+    for root, dirnames, filenames in os.walk(str(os.getcwd())):
+        for filename in filenames:
+            if ('.py' in filename or '.txt' in filename) and not '.pyc' in filename and not 'archive' in root:
+                with open(root + '\\' + filename, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                    linescounter += len(lines)
+
+    return f"Currently BaumBot consists of {linescounter} Lines Of Code!"
