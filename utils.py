@@ -27,12 +27,6 @@ async def check_and_leave(voice_channel):
         await voice_channel.disconnect()
 
 def generate_teams(members, teams=2, fair=True):
-    members.append('Test Member 1')
-    members.append('Test Member 2')
-    members.append('Test Member 3')
-    members.append('Test Member 4')
-    members.append('Test Member 5')
-
     random.shuffle(members)
     final_teams = [[] for _ in range(teams)]
     res_string = ""
