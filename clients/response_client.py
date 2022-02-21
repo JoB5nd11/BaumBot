@@ -1,4 +1,4 @@
-class Response:
+class ResponseClient:
     def __init__(self, filepath='documents/responses.txt'):
         self.filepath = filepath
         self.anser = ""

@@ -1,6 +1,7 @@
 import rule34
 import random
 import nest_asyncio
+
 nest_asyncio.apply()
 
 r34 = rule34.Sync()

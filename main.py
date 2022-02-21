@@ -7,7 +7,7 @@ from discord_slash.utils.manage_commands import create_option, create_choice
 import time
 #Own imports
 import utils
-import responses
+import games
 import clients
 import r34
 
@@ -20,6 +20,7 @@ class BaumBot:
         self.voice_channel = None
 
         self.init_clients()
+        self.init_games()
         self.init_events()
         self.init_commands()
 
@@ -27,14 +28,17 @@ class BaumBot:
         self.client.run(self.token)
 
     def init_clients(self):
-        self.responses = responses.Response()
-        self.reddit_client = clients.RedditClient()
-        self.random_client = clients.RandomClient()
-        self.porn_client = clients.PornClient()
-        self.music_client = clients.MusicClient()
-        self.stock_client = clients.StockClient()
-        self.ttt_client = clients.TicTacToeClient()
         self.book_client = clients.BookClient()
+        self.music_client = clients.MusicClient()
+        self.porn_client = clients.PornClient()
+        self.random_client = clients.RandomClient()
+        self.reddit_client = clients.RedditClient()
+        self.response_client = clients.ResponseClient()
+        self.rule34_client = clients.Rule34Client()
+        self.stock_client = clients.StockClient()
+
+    def init_games(self):
+        self.ttt_client = games.TicTacToe()
 
     def init_events(self):
         @self.client.event
@@ -45,7 +49,7 @@ class BaumBot:
         async def on_message(message):
             if message.author == self.client.user:
             	return
-            response = self.responses.responde(message.content)
+            response = self.response_client.responde(message.content)
             if response:
                 await message.channel.send(response)
 
@@ -91,49 +95,27 @@ class BaumBot:
             self.voice_channel = None
 
 
-        #Reddit client calls
-        @self.slash.slash(name="randomsubreddit", description="Gives back a random subreddit link",
-                          options=[create_option(name="nsfw", description="Include, Exclude or Exclusive NSFW", option_type=3, required=False, choices=[
+        #Book Client Calls
+        @self.slash.slash(name="getbooklist", description="Prints the Book-Database",
+                          options=[create_option(name="head", description="Number of Books from start", option_type=4, required=False),
+                                   create_option(name="tail", description="Number of Books from end", option_type=4, required=False),
+                                   create_option(name="unread", description="Include, Exclude or Exclusive read book", option_type=3, required=False, choices=[
                                                  create_choice(name="Yes", value="yes"),
                                                  create_choice(name="No", value="no"),
                                                  create_choice(name="Only", value="only")]),
-                                   create_option(name="count", description="Number of returned subreddit link", option_type=4, required=False),
-                                   create_option(name="sort", description="Returned link sort by (e.g. new, hot, top)", option_type=3, required=False, choices=[
-                                                 create_choice(name="New", value="/new"),
-                                                 create_choice(name="Hot", value="/"),
-                                                 create_choice(name="TopHour", value="/top/?t=hour"),
-                                                 create_choice(name="TopDay", value="/top/?t=day"),
-                                                 create_choice(name="TopMonth", value="/top/?t=month"),
-                                                 create_choice(name="TopYear", value="top_year': '/top/?t=year"),
-                                                 create_choice(name="TopAll", value="/top/?t=all")])])
-        async def randomsubreddit(context: SlashContext, nsfw: str ="yes", count: int =1, sort: str ="/top/?t=all"):
+                                    create_option(name="sort", description="Sort the returned book by", option_type=3, required=False, choices=[
+                                                 create_choice(name="ID", value="id"),
+                                                 create_choice(name="Title", value="title"),
+                                                 create_choice(name="Author", value="author"),
+                                                 create_choice(name="Published", value="published"),
+                                                 create_choice(name="Genre", value="Genre"),
+                                                 create_choice(name="Pages", value="pages")])])
+        async def getbooklist(context: SlashContext, head: int =-1, tail: int =-1, unread: str ="yes", sort: str ="id"):
             await context.defer()
-            await self.client.channels.get('849767692617515019').send(self.reddit_client.get_random_subreddit(NSFW=nsfw, count=count, sort=sort))
-
-        @self.slash.slash(name="randomredditpost", description="Gives back a random reddit post",
-                          options=[create_option(name="nsfw", description="Include, Exclude or Exclusive NSFW", option_type=3, required=False, choices=[
-                                                create_choice(name="Yes", value="yes"),
-                                                create_choice(name="No", value="no"),
-                                                create_choice(name="Only", value="only")]),
-                                   create_option(name="count", description="Number of returned posts", option_type=4, required=False),
-                                   create_option(name="images", description="Include, Exclude or Exclusive image content", option_type=3, required=False, choices=[
-                                                 create_choice(name="Yes", value="yes"),
-                                                 create_choice(name="No", value="no"),
-                                                 create_choice(name="Only", value="only")]),
-                                   create_option(name="spoilers", description="Wether to hide spoilers", option_type=3, required=False, choices=[
-                                                 create_choice(name="Yes", value="yes"),
-                                                 create_choice(name="No", value="no")])])
-        async def randomredditpost(context: SlashContext, nsfw: str ="yes", count: int=1, images: str ="only", spoilers: str ="no"):
-            await context.defer()
-            await self.client.channels.get('849767692617515019').send(self.reddit_client.get_random_post(NSFW=nsfw, count=count, images=images))
-
-        @self.slash.slash(name="memesoftheday", description="Gives the 5 best memes of the day")
-        async def memesoftheday(context: SlashContext):
-            await context.defer()
-            await context.send(self.reddit_client.get_memes_of_the_day())
+            await context.send(self.book_client.get_book_list(head, tail, unread, sort))
 
 
-        #Music client calls
+        #Music Client Calls
         @self.slash.slash(name="play", description="Plays music from given link",
                           options=[create_option(name="url", description="The Url of the music website", option_type=3, required=True)])
         async def play(context: SlashContext, url: str):
@@ -187,17 +169,80 @@ class BaumBot:
             await context.send(self.music_client.repeat_current_song(count))
 
         #TODO add full playlists
+        #TODO repeat song in /play
         #TODO get current playing
-        #TODO show queue
-        #TODO next
-        #TODO Repeat: count
-        #TODO clearqueue
         #TODO Spotify Ingetration
         #TODO radio <genre>
         #TODO add sfx
 
 
-        #Random Rule34 post
+        #Porn Client Calls
+        #TODO Random porn <website>
+        #TODO Random category <get links: yes/no>
+        #TODO Random porn star <get links: yes/no>
+        #TODO Random porn page
+
+
+        #Random Client Calls
+        @self.slash.slash(name="randomnumber", description="Returns a random number", options=[
+                          create_option(name="min", description="lowest possible number", option_type=4, required=False),
+                          create_option(name="max", description="highest possible number", option_type=4, required=False)])
+        async def randomnumber(context: SlashContext, min: int = 0, max: int = 1):
+            await context.send(self.random_client.get_random_number(min, max))
+
+        @self.slash.slash(name="russianroulette", description="Shoot already")
+        async def russianroulette(context: SlashContext):
+            if self.random_client.get_random_number(1, 6) == '6':
+                message = "You died!"
+                #TODO Timeout for today
+            else:
+                message = "You live (for now)"
+            await context.send(message)
+
+
+        #Reddit Client Calls
+        @self.slash.slash(name="randomsubreddit", description="Gives back a random subreddit link",
+                          options=[create_option(name="nsfw", description="Include, Exclude or Exclusive NSFW", option_type=3, required=False, choices=[
+                                                 create_choice(name="Yes", value="yes"),
+                                                 create_choice(name="No", value="no"),
+                                                 create_choice(name="Only", value="only")]),
+                                   create_option(name="count", description="Number of returned subreddit link", option_type=4, required=False),
+                                   create_option(name="sort", description="Returned link sort by (e.g. new, hot, top)", option_type=3, required=False, choices=[
+                                                 create_choice(name="New", value="/new"),
+                                                 create_choice(name="Hot", value="/"),
+                                                 create_choice(name="TopHour", value="/top/?t=hour"),
+                                                 create_choice(name="TopDay", value="/top/?t=day"),
+                                                 create_choice(name="TopMonth", value="/top/?t=month"),
+                                                 create_choice(name="TopYear", value="top_year': '/top/?t=year"),
+                                                 create_choice(name="TopAll", value="/top/?t=all")])])
+        async def randomsubreddit(context: SlashContext, nsfw: str ="yes", count: int =1, sort: str ="/top/?t=all"):
+            await context.defer()
+            await context.send(self.reddit_client.get_random_subreddit(NSFW=nsfw, count=count, sort=sort))
+
+        @self.slash.slash(name="randomredditpost", description="Gives back a random reddit post",
+                          options=[create_option(name="nsfw", description="Include, Exclude or Exclusive NSFW", option_type=3, required=False, choices=[
+                                                create_choice(name="Yes", value="yes"),
+                                                create_choice(name="No", value="no"),
+                                                create_choice(name="Only", value="only")]),
+                                   create_option(name="count", description="Number of returned posts", option_type=4, required=False),
+                                   create_option(name="images", description="Include, Exclude or Exclusive image content", option_type=3, required=False, choices=[
+                                                 create_choice(name="Yes", value="yes"),
+                                                 create_choice(name="No", value="no"),
+                                                 create_choice(name="Only", value="only")]),
+                                   create_option(name="spoilers", description="Wether to hide spoilers", option_type=3, required=False, choices=[
+                                                 create_choice(name="Yes", value="yes"),
+                                                 create_choice(name="No", value="no")])])
+        async def randomredditpost(context: SlashContext, nsfw: str ="yes", count: int=1, images: str ="only", spoilers: str ="no"):
+            await context.defer()
+            await context.send(self.reddit_client.get_random_post(NSFW=nsfw, count=count, images=images))
+
+        @self.slash.slash(name="memesoftheday", description="Gives the 5 best memes of the day")
+        async def memesoftheday(context: SlashContext):
+            await context.defer()
+            await context.send(self.reddit_client.get_memes_of_the_day())
+
+
+        #Rule 34 Client Calls
         @self.slash.slash(name="randomr34", description="Gives back random r34 post",
         options=[create_option(name="search", description="Keyword for the search", option_type=3, required=False),
                  create_option(name="gay", description="Can search be gay", option_type=5, required=False),
@@ -207,86 +252,10 @@ class BaumBot:
                  create_option(name="comic", description="Can search be a Comic", option_type=5, required=False)])
         async def randomr34(context: SlashContext, search:str="levi", gay:bool= None, hentai:bool= None, animated:bool= None, drawing:bool= None, comic:bool= None):
             await context.defer()
-            await self.client.channels.get('849767692617515019').send(r34.getr34img(search, gay, hentai, animated, drawing, comic))
+            await context.send(self.rule34_client.getr34img(search, gay, hentai, animated, drawing, comic))
 
 
-        #Book client calls
-        @self.slash.slash(name="getbooklist", description="Prints the Book-Database",
-                          options=[create_option(name="head", description="Number of Books from start", option_type=4, required=False),
-                                   create_option(name="tail", description="Number of Books from end", option_type=4, required=False),
-                                   create_option(name="unread", description="Include, Exclude or Exclusive read book", option_type=3, required=False, choices=[
-                                                 create_choice(name="Yes", value="yes"),
-                                                 create_choice(name="No", value="no"),
-                                                 create_choice(name="Only", value="only")]),
-                                    create_option(name="sort", description="Sort the returned book by", option_type=3, required=False, choices=[
-                                                 create_choice(name="ID", value="id"),
-                                                 create_choice(name="Title", value="title"),
-                                                 create_choice(name="Author", value="author"),
-                                                 create_choice(name="Published", value="published"),
-                                                 create_choice(name="Genre", value="Genre"),
-                                                 create_choice(name="Pages", value="pages")])])
-        async def getbooklist(context: SlashContext, head: int =-1, tail: int =-1, unread: str ="yes", sort: str ="id"):
-            await context.defer()
-            await context.send(self.book_client.get_book_list(head, tail, unread, sort))
-
-        # @self.slash.slash(name="getcitelist", description="Prints the Cite-Database", options=[])
-        # async def getcitelist(context: SlashContext):
-        #     pass
-
-        # @self.slash.slash(name="addbook", description="Add a book to the BaumBot Book-Database",
-        #                   options=[create_option(name="title", description="Title of the book", option_type=3, required=True),
-        #                            create_option(name="author", description="Author of the book", option_type=3, required=False),
-        #                            create_option(name="published", description="Year of publishing of the book", option_type=4, required=False),
-        #                            create_option(name="genre", description="Genre of the book (if genre not present do 'owngenre')", option_type=4, required=False, choices=[
-        #                                          create_choice(name="Fantasy", value="Fantasy"),
-        #                                          create_choice(name="SciFi", value="SciFi"),
-        #                                          create_choice(name="Dystopian", value="Dystopian"),
-        #                                          create_choice(name="Action & Adventure", value="Action & Adventure"),
-        #                                          create_choice(name="Horror", value="Horror"),
-        #                                          create_choice(name="Thriller & Suspense", value="Thriller & Suspense"),
-        #                                          create_choice(name="Romance", value="Romance")#TODO
-        #                            ]),
-        #                            create_option(name="owngenre", description="An own genre because it was not in the genre list", option_type=3, required=False),
-        #                            create_option(name="pages", description="Number of pages of the book", option_type=4, required=False),
-        #                            create_option(name="comment", description="Your comment to the book", option_type=4, required=False)])
-        # async def addbook(context: SlashContext):
-        #     #ID, TITLE, AUTHOR, PUBLISHED, GENRE, PAGES, COMMENT
-        #     pass
-
-        # @self.slash.slash(name="addcite", description="Add a cite to the BaumBot Cite-Database", options=[])
-        # async def addcite(context: SlashContext):
-        #     pass
-
-        @self.slash.slash(name="removebook", description="Removes a book at a given index", options=[])
-        async def removebook(context: SlashContext):
-            pass
-
-        # @self.slash.slash(name="removecite", description="Removes a cite at a given index", options=[])
-        # async def removecite(context: SlashContext):
-        #     pass
-
-        @self.slash.slash(name="markread", description="Mark a book at given index as read")
-        async def markread(context: SlashContext):
-            pass
-            #If already read mark as unread
-
-
-        #Random client calls
-        @self.slash.slash(name="randomnumber", description="Returns a random number", options=[
-                          create_option(name="min", description="lowest possible number", option_type=4, required=False),
-                          create_option(name="max", description="highest possible number", option_type=4, required=False)])
-        async def randomnumber(context: SlashContext, min: int = 0, max: int = 1):
-            await context.send(self.random_client.get_random_number(min, max))
-
-
-        #Porn client calls
-        #TODO Random porn <website>
-        #TODO Random category <get links: yes/no>
-        #TODO Random porn star <get links: yes/no>
-        #TODO Random porn page
-
-
-        #Stock client calls?
+        #Stock Client Calls
         #TODO get stock value <stock name> <date>
         #TODO get stock graph <stock name> <time [today, week, month, year, 5year, all]>
         #TODO get crypto value <crypto name> <date>
@@ -329,13 +298,13 @@ class BaumBot:
         #TODO Minesweeper
         #TODO Solitaire
         #TODO Battleship
-        #TODO Rogue
+        #TODO City Buidler
 
 
-        #Insults
+        #Insults #TODO
 
-        #Russian Roulette
 
+        #Other
         #Team Generator
         @self.slash.slash(name="generateteams", description="Splits all attendees in 'General' into teams", options=[
                           create_option(name="teams", description="number of teams to create", option_type=4, required=False),
@@ -343,6 +312,7 @@ class BaumBot:
         async def generateteams(context: SlashContext, teams: int = 2, fair: bool = True):
             member_list = [member.name for member in self.client.get_channel(849279926700212298).members if member != self.client.user]
             await context.send(utils.generate_teams(member_list, teams, fair))
+
 
 
 if __name__ == '__main__':
