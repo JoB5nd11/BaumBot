@@ -37,7 +37,7 @@ class Rule34Client():
             return "No images found"
 
         for img in images:
-            links.append(img.preview_url)
+            links.append(img.file_url)
 
         returnlink = random.choice(links)
         # print(returnlink)

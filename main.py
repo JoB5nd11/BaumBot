@@ -38,7 +38,8 @@ class BaumBot:
         self.stock_client = clients.StockClient()
 
     def init_games(self):
-        self.ttt_client = games.TicTacToe()
+        self.ttt_game = games.TicTacToe()
+        self.madn_game = games.Madn()
 
     def init_events(self):
         @self.client.event
@@ -265,24 +266,54 @@ class BaumBot:
         #Finance system? <- pls no, im a virign
 
 
-        #Discord Bot Games (TicTacToe, Chess, etc) calls?
+        #Discord Bot Games calls?
         #TODO multiple simultanious games (ID system)
-        @self.slash.slash(name="ttt", description="Returns a image", options=[
+
+        #TicTacToe
+        @self.slash.slash(name="ttt", description="TicTacToe Game Commands", options=[
                           create_option(name="getboard", description="gets the current board", option_type=5, required=False),
                           create_option(name="makeboard", description="creates a board from given string", option_type=3, required=False),
                           create_option(name="clearboard", description="clears the current board image", option_type=5, required=False),
                           create_option(name="draw", description="draws the next character on given space", option_type=3, required=False)])
         async def ttt(context: SlashContext, getboard: bool =False, makeboard: str ='', clearboard: bool =False, draw: str ='x0'):
             if clearboard:
-                await context.send(file=self.ttt_client.clear_board())
+                await context.send(file=self.ttt_game.clear_board())
             elif getboard:
-                await context.send(file=self.ttt_client.get_board())
+                await context.send(file=self.ttt_game.get_board())
             elif makeboard:
-                await context.send(file=self.ttt_client.get_board(makeboard))
+                await context.send(file=self.ttt_game.get_board(makeboard))
             elif draw != 0:
-                await context.send(file=self.ttt_client.move(draw))
+                await context.send(file=self.ttt_game.move(draw))
             else:
                 await context.send("I have a stroke :|")
+
+        #Mensch aegere dich nicht
+        @self.slash.slash(name="madn", description="MADN Game Commands", options=[
+                          create_option(name="debug", description="commands for debug purposes", option_type=3, required=False, choices=[
+                                        create_choice(name="showblankboard", value="showblankboard"),
+                                        create_choice(name="printrules", value="printrules"),
+                                        create_choice(name="printgamestate", value="printgamestate"),
+                                        create_choice(name="printstatus", value="printstatus"),
+                                        create_choice(name="printgameid", value="printgameid"),
+                                        create_choice(name="printplayers", value="printplayers"),
+                                        create_choice(name="printturn", value="printturn")]),
+                          create_option(name="loadgame", description="loads a game from a given ID", option_type=4, required=False),
+                          create_option(name="setup", description="commands for setting up the game", option_type=3, required=False, choices=[
+                                        create_choice(name="newgame", value="newgame"),
+                                        create_choice(name="register_red", value="register_red"),
+                                        create_choice(name="register_blue", value="register_blue"),
+                                        create_choice(name="register_yellow", value="register_yellow"),
+                                        create_choice(name="register_green", value="register_green"),
+                                        create_choice(name="register_random", value="register_random"),
+                                        create_choice(name="start", value="start")])])
+        async def madn(context: SlashContext, debug: str = None, loadgame: str = None, setup: str = None):
+            res = self.madn_game.process_command(context, debug, loadgame, setup)
+            if isinstance(res, str):
+                await context.send(res)
+            elif res:
+                await context.send(file=res)
+            else:
+                await context.send(self.madn_game.execute_stroke_protocoll())
 
         #TODO 4 gewinnt
         #TODO Chess

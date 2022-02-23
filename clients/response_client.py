@@ -1,7 +1,6 @@
 class ResponseClient:
     def __init__(self, filepath='documents/responses.txt'):
         self.filepath = filepath
-        self.anser = ""
         self.all_responses = {}
 
         self.read_responses_from_file()
@@ -16,6 +15,5 @@ class ResponseClient:
 
     def responde(self, message):
         if message not in self.all_responses:
-            print('not in responses')
-            return " "
+            return None
         return self.all_responses[message]
