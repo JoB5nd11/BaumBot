@@ -15,6 +15,8 @@ class BaumBot:
     def __init__(self, token=None):
         self.token = token
 
+        intents = discord.Intents.all()
+
         self.client = commands.Bot(command_prefix=".")
         self.slash = SlashCommand(self.client, sync_commands=True)
         self.voice_channel = None
@@ -288,6 +290,7 @@ class BaumBot:
                 await context.send("I have a stroke :|")
 
         #Mensch aegere dich nicht
+        #TODO AI Opp
         @self.slash.slash(name="madn", description="MADN Game Commands", options=[
                           create_option(name="debug", description="commands for debug purposes", option_type=3, required=False, choices=[
                                         create_choice(name="showblankboard", value="showblankboard"),
@@ -297,7 +300,7 @@ class BaumBot:
                                         create_choice(name="printgameid", value="printgameid"),
                                         create_choice(name="printplayers", value="printplayers"),
                                         create_choice(name="printturn", value="printturn")]),
-                          create_option(name="loadgame", description="loads a game from a given ID", option_type=4, required=False),
+                          create_option(name="loadgame", description="loads a game from a given ID", option_type=3, required=False),
                           create_option(name="setup", description="commands for setting up the game", option_type=3, required=False, choices=[
                                         create_choice(name="newgame", value="newgame"),
                                         create_choice(name="register_red", value="register_red"),
@@ -305,15 +308,27 @@ class BaumBot:
                                         create_choice(name="register_yellow", value="register_yellow"),
                                         create_choice(name="register_green", value="register_green"),
                                         create_choice(name="register_random", value="register_random"),
-                                        create_choice(name="start", value="start")])])
-        async def madn(context: SlashContext, debug: str = None, loadgame: str = None, setup: str = None):
-            res = self.madn_game.process_command(context, debug, loadgame, setup)
+                                        create_choice(name="start", value="start")]),
+                          create_option(name="play", description="commands for playing the game", option_type=3, required=False, choices=[
+                                        create_choice(name="roll", value="roll"),
+                                        create_choice(name="move1", value="move1"),
+                                        create_choice(name="move2", value="move2"),
+                                        create_choice(name="move3", value="move3"),
+                                        create_choice(name="move4", value="move4")]),
+                          create_option(name="extra", description="extra optionen for moves and the game", option_type=3, required=False, choices=[
+                                        create_choice(name="moveback", value="moveback")])])
+        async def madn(context: SlashContext, debug: str = None, loadgame: str = None, setup: str = None, play: str = None, extra: str = None):
+            res = self.madn_game.process_command(context, debug, loadgame, setup, play, extra)
             if isinstance(res, str):
                 await context.send(res)
             elif res:
                 await context.send(file=res)
             else:
                 await context.send(self.madn_game.execute_stroke_protocoll())
+
+        @self.slash.slash(name="newcom4", description="fuck you 4")
+        async def newcom4(context: SlashContext):
+            await context.send("Halts maul! 4")
 
         #TODO 4 gewinnt
         #TODO Chess
