@@ -12,8 +12,13 @@ class Madn:
         self.status = "<no status>"
         self.gamestate = "<no gamestate>"
         self.gameid = "<no gameid>"
-        self.players = {}
-        self.turn = "<no game>"
+        self.players = {
+            'red': None,
+            'blue': None,
+            'yellow': None,
+            'green': None,
+        }
+        self.current_player = "<no game>"
 
         self.games_folder = os.getcwd() + '\\games\\'
         self.asset_folder = os.getcwd() + '\\games\\madn\\assets\\'
@@ -51,7 +56,7 @@ class Madn:
         if debug == 'printplayers':
             return self._print_players()
         if debug == 'printturn':
-            return self.turn
+            return self.current_player
         return self.execute_stroke_protocoll()
 
 
@@ -73,23 +78,37 @@ class Madn:
 
 
     def _run_play(self, context, play):
-        if self.status != 'play':
+        if not 'play' in self.status:
             return ('You have not started a game. \n'
                     'Please use `/madn setup:newgame` to start a new game \n'
                     'or `/madn loadgame:<id>` to load into an existing game.')
 
-        player = context.author.name
+        player = None
+        for p in self.players.values():
+            if p.username == context.author.name:
+                player = p
+                break
+
+        #If the context author is not in self.players
+        if player == None:
+            return ('Excuse me, but you do not participate in this game. \n'
+                    'Wait for the next game to join...')
 
         if play == 'roll':
+            if not 'roll' in self.status:
+                return ('You cannot roll the dice now. \n'
+                        'You have to move one of the following figures: \n'
+                        f'{self.current_player.get_moveable_figures_as_string()}')
             return self._roll_dice(player)
-        if play == 'move1':
-            pass
-        if play == 'move2':
-            pass
-        if play == 'move3':
-            pass
-        if play == 'move4':
-            pass
+
+        if 'move' in play:
+            if not 'move' in self.status:
+                return ('You cannot move now. \n'
+                        'You have to move roll the dice first with: `/madn play:roll`')
+            #give figure number to player.move(),
+            #Format: move1, move2, move3 or move4
+            return player.move(play.split('move')[1])
+
         return self.execute_stroke_protocoll()
 
 
@@ -127,8 +146,13 @@ class Madn:
         self.status = 'setup'
         self.gameid = self._generate_new_id()
         self.gamestate = self._generate_new_gamestate()
-        self.players = {}
-        self.turn = "<no game>"
+        self.players = {
+            'red': None,
+            'blue': None,
+            'yellow': None,
+            'green': None,
+        }
+        self.current_player = "<no game>"
 
         return (f'Your GameID is **{self.gameid}**\n'
                 'Please register for the game now...')
@@ -143,16 +167,15 @@ class Madn:
         if color == 'random':
             free_color_list = []
             for color in self.colors:
-                if color not in self.players:
+                if self.players[color] == None:
                     free_color_list.append(color)
 
             color = random.choice(free_color_list)
 
-        if color in self.players:
+        if self.players[color] != None:
             return 'This color is already occupied, please choose another'
 
-        self.players[color] = user
-
+        self.players[color] = Player(user, color)
         return f'Welcome `{user}`, your are **{color.upper()}**'
 
 
@@ -162,17 +185,30 @@ class Madn:
                     'Please use `/madn setup:newgame` to start a new game \n'
                     'or `/madn loadgame:<id>` to load into an existing game.')
 
-        if len(list(self.players.keys())) == 0:
+        for key, value in self.players.items():
+            if value != None:
+                break
+        #Runs only if the loop isn't fully run (if a value was found)
+        else:
             return ('You cannot start the game without any registered players... \n'
                     'Please use `/madn setup:register_<color>` to register')
 
+        #Remove all empty keys in Player dict
+        to_delete_keys = []
+        for key, value in self.players.items():
+            if value == None:
+                to_delete_keys.append(key)
+
+        for key in to_delete_keys:
+            del self.players[key]
+
         first_color = random.choice(list(self.players.keys()))
-        first_player = self.players[first_color]
-        self.turn = first_color
-        self.status = 'play'
+        first_player = self.players[first_color] #Returns a player object
+        self.current_player = first_player
+        self.status = f'play roll {self.current_player}'
 
         return ('Let the Game begin! \n'
-                f'`{first_player} ({self.turn})` begins...')
+                f'{first_player} begins...')
 
 
     def _generate_new_gamestate(self):
@@ -192,14 +228,10 @@ class Madn:
 
     def _print_players(self):
         answer = ""
-        if 'red' in self.players:
-            answer += (f'**Red**: {self.players["red"]}\n')
-        if 'blue' in self.players:
-            answer += (f'**Blue**: {self.players["blue"]}\n')
-        if 'yellow' in self.players:
-            answer += (f'**Yellow**: {self.players["yellow"]}\n')
-        if 'green' in self.players:
-            answer += (f'**Green**: {self.players["green"]}\n')
+
+        for key in self.players.keys():
+            if self.players[key] != None:
+                answer += str(self.players[key]) + '\n'
 
         if answer == "":
             return 'No players registered yet, use `/madn setup:register_<color>` to register'
@@ -207,24 +239,60 @@ class Madn:
 
 
     def _roll_dice(self, player):
-        if self.status != 'play':
+        if not 'play' in self.status:
             return ('You have not started a game. \n'
                     'Please use `/madn setup:newgame` to start a new game \n'
                     'or `/madn loadgame:<id>` to load into an existing game.')
 
         if not self._is_players_turn(player):
             return ('Sorry it is not you turn right now. \n'
-                    f'Currently it is {self.players[self.turn]}s turn')
+                    f'Currently it is {self.current_player}\'s turn')
 
         dice = random.randint(1, 6)
-        return f'You rolled a {dice}!'
+        answer = f'You rolled a `{dice}`\n'
+
+        if player.are_all_figures_home() and dice != 6:
+            if player.contiguous_turns < 2:
+                answer += 'Please roll again'
+            else:
+                self.current_player.contiguous_turns = 0
+                self.current_player = self._get_next_turn_player()
+
+                answer += 'Sorry :/\n'
+                answer += f'Next player: {self.current_player}'
+                self.status = f'play roll {self.current_player}'
+            player.contiguous_turns += 1
+            return answer
+
+        if player.are_all_figures_home() and dice == 6:
+            answer += 'You can choose one of your figures to set it on the board...'
+            self.status = f'play move {self.current_player}'
+            return answer
+
+        return self.execute_stroke_protocoll()
 
 
     def _is_players_turn(self, player):
         for key, value in self.players.items():
-            if key == self.turn and value == player:
+            if key == self.current_player.color and value == player:
                 return True
         return False
+
+
+    def _get_next_turn_player(self):
+        found = False
+        for key, value in self.players.items():
+            if found:
+                return value
+
+            if key == self.current_player.color:
+                found = True
+
+        #If last ones turn, first player in dict is returned
+        if found:
+            return list(self.players.values())[0]
+        else:
+            return self.execute_stroke_protocoll()
 
 
     def execute_stroke_protocoll(self):
@@ -232,16 +300,48 @@ class Madn:
         return 'I have a stroke :|'
 
 
+
+class Player:
+    def __init__(self, username, color):
+        self.username = username
+        self.color = color
+
+        self.figures = {
+            '1': Figure(1, self.color),
+            '2': Figure(2, self.color),
+            '3': Figure(3, self.color),
+            '4': Figure(4, self.color),
+        }
+
+        self.current_roll = -1
+        self.in_goal = [None, None, None, None]
+        self.contiguous_turns = 0
+
+    def __str__(self):
+        return f"`{self.username}` *({self.color})*"
+
+    def move(self, number):
+        #TODO
+        pass
+
+    def are_all_figures_home(self):
+        for figure in self.figures.values():
+            if not figure.is_in_house:
+                return False
+        return True
+
+    def get_moveable_figures_as_string(self):
+        pass
+
+
+
 class Figure:
     def __init__(self, number, color):
-        self.number = -1
-        self.color = None
+        self.number = number
+        self.color = color
         self.position = -1
         self.is_in_house = True
         self.is_in_goal = False
-
-        self.GOAL = [-1, -1, -1, -1]
-
         self.setup()
 
     def setup(self):
@@ -255,21 +355,13 @@ class Figure:
         Likewise for all other colors.
         """
         if self.color == 'red':
-            self.GOAL = [44, 45, 46, 47]
             self.position = 39 + self.number
-
         elif self.color == 'blue':
-            self.GOAL = [52, 53, 54, 55]
             self.position = 47 + self.number
-
         elif self.color == 'yellow':
-            self.GOAL = [60, 61, 62, 63]
             self.position = 55 + self.number
-
         elif self.color == 'green':
-            self.GOAL = [68, 69, 70, 71]
             self.position = 63 + self.number
-
         else:
             raise ValueError(f"The color of this figure ({self.color}) is either not "
                               "red, blue, yellow or green, "
@@ -294,4 +386,8 @@ class Figure:
 
 if __name__ == '__main__':
     madn = Madn()
-    # print(madn._register_player('Xaver115', 'random'))
+    print(madn._create_new_game(), "\n")
+    print(madn._register_player('Test1', 'random'), "\n")
+    print(madn._register_player('Test2', 'random'), "\n")
+    print(madn._start_game(), "\n")
+    print(madn._roll_dice(madn.current_player))
