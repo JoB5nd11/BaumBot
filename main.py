@@ -98,6 +98,30 @@ class BaumBot:
             self.voice_channel = None
 
 
+        #Response Client Calls
+        @self.slash.slash(name="printresponses", description="Prints a list of all responses")
+        async def printresponses(context: SlashContext):
+            await context.send(self.response_client.print_responses())
+
+        @self.slash.slash(name="addresponse", description="Add a new Response to BaumBot's response list",
+                          options=[create_option(name="trigger", description="Text that triggers BaumBot's answer", option_type=3, required=True),
+                                   create_option(name="answer", description="Text that BaumBot should return", option_type=3, required=True)])
+        async def addresponse(context: SlashContext, trigger, answer):
+            self.response_client.add_response(trigger, answer)
+            await context.send(f'Added Response: `{trigger} -> {answer}`')
+
+        @self.slash.slash(name="deleteallresponses", description="Deletes All Answers from a specific Trigger",
+                          options=[create_option(name="trigger", description="Text that triggers BaumBot's answer", option_type=3, required=True)])
+        async def deleteallresponses(context: SlashContext, trigger):
+            await context.send(self.response_client.delete_all_reponses(trigger))
+
+        @self.slash.slash(name="deleteresponse", description="Deletes a specific Answer from a specific Trigger",
+                          options=[create_option(name="trigger", description="Text that triggers BaumBot's answer", option_type=3, required=True),
+                                   create_option(name="answer", description="Text that BaumBot should return", option_type=3, required=True)])
+        async def deleteresponse(context: SlashContext, trigger, answer):
+            await context.send(self.response_client.delete_response(trigger, answer))
+
+
         #Book Client Calls
         @self.slash.slash(name="getbooklist", description="Prints the Book-Database",
                           options=[create_option(name="head", description="Number of Books from start", option_type=4, required=False),
@@ -270,6 +294,7 @@ class BaumBot:
 
         #Discord Bot Games calls?
         #TODO multiple simultanious games (ID system)
+        #TODO AI OPs
 
         #TicTacToe
         @self.slash.slash(name="ttt", description="TicTacToe Game Commands", options=[
@@ -290,7 +315,6 @@ class BaumBot:
                 await context.send("I have a stroke :|")
 
         #Mensch aegere dich nicht
-        #TODO AI Opp
         @self.slash.slash(name="madn", description="MADN Game Commands", options=[
                           create_option(name="debug", description="commands for debug purposes", option_type=3, required=False, choices=[
                                         create_choice(name="showblankboard", value="showblankboard"),
@@ -299,7 +323,8 @@ class BaumBot:
                                         create_choice(name="printstatus", value="printstatus"),
                                         create_choice(name="printgameid", value="printgameid"),
                                         create_choice(name="printplayers", value="printplayers"),
-                                        create_choice(name="printturn", value="printturn")]),
+                                        create_choice(name="printturn", value="printturn"),
+                                        create_choice(name="roll6", value="roll6")]),
                           create_option(name="loadgame", description="loads a game from a given ID", option_type=3, required=False),
                           create_option(name="setup", description="commands for setting up the game", option_type=3, required=False, choices=[
                                         create_choice(name="newgame", value="newgame"),
@@ -323,6 +348,7 @@ class BaumBot:
                 await context.send(res)
             elif res:
                 await context.send(file=res)
+                await context.send(self.madn_game.next_step())
             else:
                 await context.send(self.madn_game.execute_stroke_protocoll())
 
@@ -338,13 +364,13 @@ class BaumBot:
         #TODO Dame
         #TODO Backgamnom
         #TODO Monopoly
-        #TODO Mensch ärgere dich nicht
         #TODO Snakes and Ladders
         #TODO Slot Machine (Multiple?)
         #TODO Minesweeper
         #TODO Solitaire
         #TODO Battleship
         #TODO City Buidler
+        #TODO SDJR
 
 
         #Insults #TODO

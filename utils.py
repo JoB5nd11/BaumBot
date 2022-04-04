@@ -54,14 +54,17 @@ def generate_teams(members, teams=2, fair=True):
 
 
 def calc_loc():
-    filename_list = []
     linescounter = 0
+    forbidden = ['responses.txt']
 
     for root, dirnames, filenames in os.walk(str(os.getcwd())):
         for filename in filenames:
-            if ('.py' in filename or '.txt' in filename) and not '.pyc' in filename and not 'archive' in root:
+            if ('.py' in filename or '.txt' in filename) and not '.pyc' in filename and not 'archive' in root and filename not in forbidden:
                 with open(root + '\\' + filename, 'r', encoding='utf-8') as f:
                     lines = f.readlines()
                     linescounter += len(lines)
 
     return f"Currently BaumBot consists of {linescounter} Lines Of Code!"
+
+if __name__ == '__main__':
+    print(calc_loc())

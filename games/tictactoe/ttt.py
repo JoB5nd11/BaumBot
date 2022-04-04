@@ -1,6 +1,6 @@
 import os
 import discord
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image
 
 class TicTacToe:
     def __init__(self):
