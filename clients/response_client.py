@@ -22,6 +22,8 @@ class ResponseClient:
         response_file.close()
 
     def print_responses(self):
+        self.read_responses_from_file()
+        
         answer = ""
         for key in self.get_alphabet_copy():
             for a in self.all_responses[key]:
@@ -29,6 +31,8 @@ class ResponseClient:
         return answer
 
     def responde(self, message):
+        self.read_responses_from_file()
+
         for r in self.all_responses:
             if r in message:
                 return random.choice(self.all_responses[r])

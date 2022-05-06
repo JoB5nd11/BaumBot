@@ -1,15 +1,13 @@
-#Discord imports
 import discord
 from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_option, create_choice
-#Other imports
+
 import time
-#Own imports
+
 import utils
 import games
 import clients
-import r34
 
 class BaumBot:
     def __init__(self, token=None):
@@ -195,19 +193,20 @@ class BaumBot:
             await context.defer()
             await context.send(self.music_client.repeat_current_song(count))
 
-        #TODO add full playlists
-        #TODO repeat song in /play
-        #TODO get current playing
         #TODO Spotify Ingetration
         #TODO radio <genre>
         #TODO add sfx
 
 
         #Porn Client Calls
-        #TODO Random porn <website>
-        #TODO Random category <get links: yes/no>
-        #TODO Random porn star <get links: yes/no>
+        #TODO Random porn video
+        #TODO Random porn image gallery
+        #TODO Random category <media: video/image> <get links: yes/no>
+        #TODO Random porn star <media: video/image> <get links: yes/no>
         #TODO Random porn page
+        #TODO Random From Fav List <media: video/image>
+        #TODO Get From Category <site> <media: video/image>
+        #TODO Get From Star <site> <media: video/image>
 
 
         #Random Client Calls
@@ -369,8 +368,7 @@ class BaumBot:
         #TODO Minesweeper
         #TODO Solitaire
         #TODO Battleship
-        #TODO City Buidler
-        #TODO SDJR
+        #TODO City Buidler+
 
 
         #Insults #TODO
