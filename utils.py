@@ -1,11 +1,11 @@
-import discord
+# import discord
 import random
 import math
 import os
 
 async def check_and_join(voice_channel, context, on_join=False):
     #If the author is not in any voice channel
-    if not context.author.voice:
+    if not context.author.channel_id:
         await context.send('I cannot join, because you are not in any voice channel')
         return voice_channel #Do not return Null, because bot could be in channel but author not
 
@@ -56,10 +56,10 @@ def generate_teams(members, teams=2, fair=True):
 def calc_loc():
     linescounter = 0
     forbidden = ['responses.txt']
-
     for root, dirnames, filenames in os.walk(str(os.getcwd())):
         for filename in filenames:
-            if ('.py' in filename or '.txt' in filename) and not '.pyc' in filename and not 'archive' in root and filename not in forbidden:
+            if ('.py' in filename or '.txt' in filename or '.json' in filename) \
+                and not '.pyc' in filename and not 'archive' in root and filename not in forbidden:
                 with open(root + '\\' + filename, 'r', encoding='utf-8') as f:
                     lines = f.readlines()
                     linescounter += len(lines)

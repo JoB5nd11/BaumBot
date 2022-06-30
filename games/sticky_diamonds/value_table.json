@@ -1,0 +1,72 @@
+{
+    "cherry": {
+        "name": "cherry",
+        "emoji": "🍒",
+        "multiplies": [0.5, 2.5, 10],
+        "frequency": 1,
+        "sprite": "assets/cherry.png"
+    },
+    "citrus": {
+        "name": "citrus",
+        "emoji": "🍋",
+        "multiplies": [0.5, 2.5, 10],
+        "frequency": 1,
+        "sprite": "assets/citrus.png"
+    },
+    "orange": {
+        "name": "orange",
+        "emoji": "🍊",
+        "multiplies": [0.5, 2.5, 10],
+        "frequency": 1,
+        "sprite": "assets/orange.png"
+    },
+    "plum": {
+        "name": "plum",
+        "emoji": "🍆",
+        "multiplies": [0.5, 2.5, 10],
+        "frequency": 1,
+        "sprite": "assets/plum.png"
+    },
+    "grape": {
+        "name": "grape",
+        "emoji": "🍇",
+        "multiplies": [1, 5, 10],
+        "frequency": 2,
+        "sprite": "assets/grape.png"
+    },
+    "melon": {
+        "name": "melon",
+        "emoji": "🍉",
+        "multiplies": [1, 5, 10],
+        "frequency": 2,
+        "sprite": "assets/melon.png"
+    },
+    "bell": {
+        "name": "bell",
+        "emoji": "🔔",
+        "multiplies": [2, 10, 50],
+        "frequency": 5,
+        "sprite": "assets/bell.png"
+    },
+    "seven": {
+        "name": "seven",
+        "emoji": "7️⃣",
+        "multiplies": [5, 50, 200],
+        "frequency": 10,
+        "sprite": "assets/seven.png"
+    },
+    "ruby": {
+        "name": "ruby",
+        "emoji": "💎",
+        "multiplies": [0, 0, 0],
+        "frequency": 7,
+        "sprite": "assets/ruby.png"
+    },
+    "thunder": {
+        "name": "thunder",
+        "emoji": "Ⓜ️",
+        "multiplies": [0, 0, 0],
+        "frequency": 10,
+        "sprite": "assets/thunder.png"
+    }
+}

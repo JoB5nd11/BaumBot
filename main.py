@@ -3,8 +3,6 @@ from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_option, create_choice
 
-import time
-
 import utils
 import games
 import clients
@@ -40,16 +38,17 @@ class BaumBot:
     def init_games(self):
         self.ttt_game = games.TicTacToe()
         self.madn_game = games.Madn()
+        self.sticky_diamond_slot = games.StickyDiamonds() #TODO
 
     def init_events(self):
         @self.client.event
         async def on_ready(): #Show registration data on load-up e.g. 'BaumBot#4721' in console
-        	print('We have logged in as {0.user}'.format(self.client))
+            print('We have logged in as {0.user}'.format(self.client))
 
         @self.client.event
         async def on_message(message):
             if message.author == self.client.user:
-            	return
+                return
             response = self.response_client.responde(message.content)
             if response:
                 await message.channel.send(response)
@@ -280,6 +279,23 @@ class BaumBot:
             await context.defer()
             await context.send(self.rule34_client.getr34img(search, gay, hentai, animated, drawing, comic))
 
+        #Conversion Client Calls
+        #kg to lb and stuff
+
+        #Timer Client Calls
+
+        #Math Client Calls
+        #calc
+        #calc4x
+        #calccomplexconv
+        #mathplot2d
+        #mathplot3d
+        #mathderivative
+        #mathintegral
+        #makechart
+
+        #Science Client Calls
+        #Draw molecule
 
         #Stock Client Calls
         #TODO get stock value <stock name> <date>
@@ -351,9 +367,7 @@ class BaumBot:
             else:
                 await context.send(self.madn_game.execute_stroke_protocoll())
 
-        @self.slash.slash(name="newcom4", description="fuck you 4")
-        async def newcom4(context: SlashContext):
-            await context.send("Halts maul! 4")
+
 
         #TODO 4 gewinnt
         #TODO Chess
@@ -368,11 +382,40 @@ class BaumBot:
         #TODO Minesweeper
         #TODO Solitaire
         #TODO Battleship
-        #TODO City Buidler+
+        #TODO City Buidler
 
+        #Casino Client Calls (also Game Client, but with Money)
+        @self.slash.slash(name="casino", description="Get Casino Commands", options=[
+                          create_option(name="getbalance", description="see the money amount you have", option_type=5, required=False),
+                          create_option(name="getbankbalance", description="see the money of the bank", option_type=5, required=False),
+                          create_option(name="getgames", description="prints out all the casino games", option_type=5, required=False)])
+        async def casino(context: SlashContext, getbalance: bool = False, getbankbalance: bool = False, getgames: bool = False):
+            pass
+
+        @self.slash.slash(name="blackjack", description="Blackjack Game Commands", options=[
+                          create_option(name="join", description="join a game of blackjack", option_type=5, required=False),
+                          create_option(name="hit", description="set a amount of coins on your current hand", option_type=4, required=False),
+                          create_option(name="stand", description="wait for the end of the round", option_type=5, required=False),
+                          create_option(name="double", description="double you current bet (only on first move)", option_type=5, required=False),
+                          create_option(name="split", description="split you current hand (only if double on hand)", option_type=5, required=False),
+                          create_option(name="surrender", description="drop your current hand and lose your bet", option_type=5, required=False),
+                          create_option(name="printrules", description="prints the blackjack's rules", option_type=5, required=False)])
+        async def blackjack(context: SlashContext, join: bool = False, hit: int = None, stand: bool = False, double: bool = False,
+                                                   split: bool = False, surrender: bool = False, printrules: bool = False):
+            pass
+        #Blackjack
+            # registration
+            #/blackjack join
+            # hit, stand, double, split, surrender
+            #/blackjack hit:<value>
+            #/blackjack stand
+            #/blackjack double
+            #/blackjack split
+            #/blackjack surrender
+
+            # both blackjack 3:2 -> 30$ out for 20$ in
 
         #Insults #TODO
-
 
         #Other
         #Team Generator
@@ -384,11 +427,29 @@ class BaumBot:
             await context.send(utils.generate_teams(member_list, teams, fair))
 
 
+        #Testing
+        @self.slash.slash(name="testgif", description="Testing function for gifs")
+        async def testgif(context: SlashContext):
+            from PIL import Image
+            import glob
+            file_names = ['./games/madn/assets/blue1.png',
+                          './games/madn/assets/green1.png',
+                          './games/madn/assets/red1.png',
+                          './games/madn/assets/yellow1.png']
+            frames = [Image.open(image) for image in file_names]
+            frame_one = frames[0]
+            frame_one.save("my_awesome.gif", format="GIF", append_images=frames, save_all=True, duration=400, loop=0)
+            with open('./my_awesome.gif', 'rb') as f:
+                await context.send(file=discord.File(f, filename='my_awesome.gif'))
+
+        @self.slash.slash(name="testslotroll", description="Test rolling a slot")
+        async def testslotroll(context: SlashContext):
+            slot = self.sticky_diamond_slot
+            await context.send(slot.test_roll())
+
 
 if __name__ == '__main__':
-    token_file = open('safe/token.txt', 'r')
-    Lines = token_file.readlines()
-    for line in Lines:
-        token = line.split('\n')[0]
+    with open('./safe/token.txt', 'r') as file:
+        token = file.readline().strip()
     baumBot = BaumBot(token)
     baumBot.run()

@@ -122,7 +122,6 @@ class MusicClient:
             voice_channel.play(discord.FFmpegPCMAudio(get_url), after=lambda x=0: self._play_next_song(voice_channel))
 
 
-
 if __name__ == '__main__':
     mc = MusicClient()
     with mc.youtube as ydl:

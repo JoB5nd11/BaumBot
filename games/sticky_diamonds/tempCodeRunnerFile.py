@@ -1,0 +1,5 @@
+print("Random Number: ", random_number)
+            # print("Current Element: ", self.value_table[el]['real_frequency_sum'])
+            # print("Difference: ", abs(random_number - self.value_table[el]['real_frequency_sum']))
+            # print("Curr. Min. Diff: ", current_shortest)
+            # print()
